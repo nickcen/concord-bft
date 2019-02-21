@@ -646,6 +646,9 @@ namespace BasicRandomTests
 					return false;
 				}
 				SimpleConditionalWriteHeader* pCondWrite = (SimpleConditionalWriteHeader*)command.data;
+
+				print((SimpleRequestHeader*)pCondWrite);
+
 				if (command.size < pCondWrite->size())
 				{
 					CHECK(false, "small message");
