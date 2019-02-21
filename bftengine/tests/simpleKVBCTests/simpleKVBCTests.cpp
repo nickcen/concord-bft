@@ -153,7 +153,6 @@ namespace BasicRandomTests
 			}
 		};
 
-
 		struct SimpleReadHeader
 		{
 			SimpleRequestHeader h;
@@ -573,7 +572,7 @@ namespace BasicRandomTests
 
 				// fill request
 				pHeader->h.type = 2;
-				pHeader->readVerion = 0;
+				pHeader->readVerion = 2;
 				pHeader->numberOfKeysToRead = numberOfReads;
 
 				strcpy(pHeader->keys[0].key, k.c_str());
