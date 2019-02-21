@@ -416,6 +416,8 @@ namespace BasicRandomTests
 			static void createRandomTest(IClient* client)
 			{
 				InternalTestsBuilder t(1);
+				t.write(client);
+				t.read(client);
 				t.create(client);
 
 				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
