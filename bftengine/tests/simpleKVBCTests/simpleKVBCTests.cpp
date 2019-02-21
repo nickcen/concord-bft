@@ -360,19 +360,23 @@ namespace BasicRandomTests
 					printf(" >");
 					printf("\n");
 				}
-
 			}
 			else if (r->type == 2)
 			{
 				SimpleReadHeader* p = (SimpleReadHeader*)r;
 				printf("\n");
 				printf("Read: version=%" PRId64 " numberOfKeysToRead=%zu\n", p->readVerion, p->numberOfKeysToRead);
+
 				for (size_t i = 0; i < p->numberOfKeysToRead; i++)
 				{
-					printf("keys_%d= ", i);
+					printf("%4s", " ");
+					printf("< ");
 					for (int k = 0; k < KV_LEN; k++){
 						printf("%02X", p->keys[i].key[k]);
-					} 
+					}
+					printf(" ; ");
+					printf(" >");
+					printf("\n");
 				}
 			}
 			else if (r->type == 3)
@@ -382,7 +386,7 @@ namespace BasicRandomTests
 			else
 			{
 				assert(0);
-			}			
+			}		
 			printf("\n");
 		}
 
@@ -433,8 +437,10 @@ namespace BasicRandomTests
 			static void createRandomTest(IClient* client)
 			{
 				InternalTestsBuilder t(1);
-				t.write(client);
-				t.read(client);
+				t.write(client, "k1", "v1");
+				t.write(client, "k2", "v2");
+				t.read(client, "k1");
+				t.read(client, "k1");
 				t.create(client);
 
 				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
@@ -477,7 +483,7 @@ namespace BasicRandomTests
 				}
 			}
 
-			void write(IClient* client)
+			void write(IClient* client, std::string k, std::string v)
 			{
 				// Create request
 
@@ -500,15 +506,8 @@ namespace BasicRandomTests
 					memcpy(pReadKeysArray[i].key /*+ sizeof(int64_t)*/, &k, sizeof(size_t));
 				}
 
-				std::string k("hello");
-				std::string v("world");
-
-				printf("k is %s, size is %lu.\n", k.c_str(), k.size());
-
 				strcpy(pWritesKVArray[0].key, k.c_str());
 				strcpy(pWritesKVArray[0].val, v.c_str());
-
-				printf("pwk is %s, size is %lu.\n", pWritesKVArray[0].key, strlen(pWritesKVArray[0].key));
 
 				print((SimpleRequestHeader*)pHeader);
 				Slice command((const char*)pHeader, sizeOfReq((SimpleRequestHeader*)pHeader));
@@ -566,7 +565,7 @@ namespace BasicRandomTests
 				// 	return pHeader;
 			}
 
-			void read(IClient* client)
+			void read(IClient* client, std::string k)
 			{
 				// Create request
 				size_t numberOfReads = 1;
@@ -578,7 +577,6 @@ namespace BasicRandomTests
 				pHeader->readVerion = 1;
 				pHeader->numberOfKeysToRead = numberOfReads;
 
-				std::string k("hello");
 				strcpy(pHeader->keys[0].key, k.c_str());
 
 				// add request to m_requests
