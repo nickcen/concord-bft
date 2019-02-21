@@ -440,7 +440,7 @@ namespace BasicRandomTests
 				t.write(client, "k1", "v1");
 				t.write(client, "k2", "v2");
 				t.read(client, "k1");
-				t.read(client, "k1");
+				t.read(client, "k2");
 				t.create(client);
 
 				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
