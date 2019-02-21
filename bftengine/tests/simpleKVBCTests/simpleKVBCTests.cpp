@@ -491,7 +491,7 @@ namespace BasicRandomTests
 
 				printf("pwk is %s, size is %lu.\n", pWritesKVArray[0].key, strlen(pWritesKVArray[0].key));
 
-				Slice command((const char*)pHeader, sizeOfReq(pHeader));
+				Slice command((const char*)pHeader, sizeOfReq((SimpleRequestHeader*)pHeader));
 				Slice reply;
 
 				printf("--- invokeCommandSynch ===\n");
@@ -564,7 +564,7 @@ namespace BasicRandomTests
 				// add request to m_requests
 					// m_requests.push_back((SimpleRequestHeader*)pHeader);
 				
-				Slice command((const char*)pHeader, sizeOfReq(pHeader));
+				Slice command((const char*)pHeader, sizeOfReq((SimpleRequestHeader*)pHeader));
 				Slice reply;
 
 				printf("--- invokeCommandSynch ===\n");
