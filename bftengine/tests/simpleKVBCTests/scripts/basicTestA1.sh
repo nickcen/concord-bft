@@ -15,7 +15,7 @@ echo "Sleeping for 2 seconds"
 sleep 2
 
 echo "Running client!"
-time ../TesterClient/skvbc_client -f 1 -c 0 -p 1800 -i 4  
+time ../TesterClient/skvbc_client -f 1 -c 0 -p 1 -i 4  
 
 echo "Finished!"
 # Cleaning up

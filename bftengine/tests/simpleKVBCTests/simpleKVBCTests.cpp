@@ -17,6 +17,7 @@
 #include <set>
 #include <list>
 #include <chrono>
+#include <string>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
@@ -462,14 +463,16 @@ namespace BasicRandomTests
 
 				for (size_t i = 0; i < numOfRequests; i++)
 				{
-					int prc = rand() % 100 + 1;
-					if (prc <= 50)
-						createAndInsertRandomRead();
-					else if (prc <= 95)
-						createAndInsertRandomConditionalWrite();
-					else if (prc <= 100)
-						createAndInsertGetLastBlock();
-					else assert(0);
+					// int prc = rand() % 100 + 1;
+					// if (prc <= 50)
+					// 	createAndInsertRandomRead();
+					// else if (prc <= 95)
+					// 	createAndInsertRandomConditionalWrite();
+					// else if (prc <= 100)
+					// 	createAndInsertGetLastBlock();
+					// else assert(0);
+
+					createAndInsertRandomConditionalWrite();
 				}
 
 				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
@@ -493,8 +496,8 @@ namespace BasicRandomTests
 				BlockId readVer = m_lastBlockId;
 				if (m_lastBlockId > CONFLICT_DISTANCE) readVer -= (rand() % CONFLICT_DISTANCE);
 
-				size_t numberOfWrites = (rand() % (MAX_WRITES_IN_REQ - 1)) + 1;
-				size_t numberOfKeysInReadSet = (rand() % MAX_READ_SET_SIZE_IN_REQ);
+				size_t numberOfWrites = 0;
+				size_t numberOfKeysInReadSet = 1;
 
 				SimpleConditionalWriteHeader* pHeader = SimpleConditionalWriteHeader::alloc(numberOfKeysInReadSet, numberOfWrites);
 
@@ -517,18 +520,21 @@ namespace BasicRandomTests
 				std::set<size_t> usedKeys;
 				for (size_t i = 0; i < numberOfWrites; i++)
 				{
-					size_t k = 0;
-					do  // avoid duplications 
-					{
-						k = rand() % NUMBER_OF_KEYS;
-					} while (usedKeys.count(k) > 0);
-					usedKeys.insert(k);
+					// size_t k = 0;
+					// do  // avoid duplications 
+					// {
+					// 	k = rand() % NUMBER_OF_KEYS;
+					// } while (usedKeys.count(k) > 0);
+					// usedKeys.insert(k);
 
-					size_t v = rand();
+					string k = "hello";
+					string v = "world";
+
+					// size_t v = rand();
 					//memcpy(pWritesKVArray[i].key, &m_testPrefix, sizeof(int64_t));
 					//memcpy(pWritesKVArray[i].val, &m_testPrefix, sizeof(int64_t));
-					memcpy(pWritesKVArray[i].key /*+ sizeof(int64_t)*/, &k, sizeof(size_t));
-					memcpy(pWritesKVArray[i].val /*+ sizeof(int64_t)*/, &v, sizeof(size_t));
+					memcpy(pWritesKVArray[i].key /*+ sizeof(int64_t)*/, &k, k.size());
+					memcpy(pWritesKVArray[i].val /*+ sizeof(int64_t)*/, &v, v.size());
 				}
 
 				// add request to m_requests
@@ -548,47 +554,47 @@ namespace BasicRandomTests
 						}
 				}
 
-				// add expected reply to m_replies
+				// // add expected reply to m_replies
 
-				SimpleReplyHeader_ConditionalWrite* pReply = SimpleReplyHeader_ConditionalWrite::alloc();
-				pReply->h.type = 1;
-				if (foundConflict) {
-					pReply->succ = false;	pReply->latestBlock = m_lastBlockId;
-				}
-				else {
-					pReply->succ = true;	pReply->latestBlock = m_lastBlockId + 1;
-				}
+				// SimpleReplyHeader_ConditionalWrite* pReply = SimpleReplyHeader_ConditionalWrite::alloc();
+				// pReply->h.type = 1;
+				// if (foundConflict) {
+				// 	pReply->succ = false;	pReply->latestBlock = m_lastBlockId;
+				// }
+				// else {
+				// 	pReply->succ = true;	pReply->latestBlock = m_lastBlockId + 1;
+				// }
 
-				m_replies.push_back((SimpleReplyHeader*)pReply);
+				// m_replies.push_back((SimpleReplyHeader*)pReply);
 
-				// if needed, add new block into the blockchain
-				if (!foundConflict)
-				{
-					m_lastBlockId++;
+				// // if needed, add new block into the blockchain
+				// if (!foundConflict)
+				// {
+				// 	m_lastBlockId++;
 
-					const size_t N = pHeader->numberOfWrites;
+				// 	const size_t N = pHeader->numberOfWrites;
 
-					SimpleBlock* pNewBlock = SimpleBlock::alloc(N);
+				// 	SimpleBlock* pNewBlock = SimpleBlock::alloc(N);
 
-					pNewBlock->id = m_lastBlockId;
-					pNewBlock->numberOfItems = N;
+				// 	pNewBlock->id = m_lastBlockId;
+				// 	pNewBlock->numberOfItems = N;
 
-					for (size_t i = 0; i < N; i++)
-					{
-						pNewBlock->items[i] = pWritesKVArray[i];
+				// 	for (size_t i = 0; i < N; i++)
+				// 	{
+				// 		pNewBlock->items[i] = pWritesKVArray[i];
 
-						SimpleKey sk;
-						memcpy(sk.key, pWritesKVArray[i].key, KV_LEN);
+				// 		SimpleKey sk;
+				// 		memcpy(sk.key, pWritesKVArray[i].key, KV_LEN);
 
-						SimpleVal sv;
-						memcpy(sv.v, pWritesKVArray[i].val, KV_LEN);
+				// 		SimpleVal sv;
+				// 		memcpy(sv.v, pWritesKVArray[i].val, KV_LEN);
 
-						SimpleKIDPair kiPair(sk, m_lastBlockId);
-						m_map[kiPair] = sv;
-					}
+				// 		SimpleKIDPair kiPair(sk, m_lastBlockId);
+				// 		m_map[kiPair] = sv;
+				// 	}
 
-					m_internalBlockchain[m_lastBlockId] = pNewBlock;
-				}
+				// 	m_internalBlockchain[m_lastBlockId] = pNewBlock;
+				// }
 			}
 
 
