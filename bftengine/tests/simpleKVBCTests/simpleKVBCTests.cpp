@@ -446,8 +446,6 @@ namespace BasicRandomTests
 
 			void create(IClient* client)
 			{
-				srand(seed);
-
 				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
 					it != m_internalBlockchain.end(); it++)
 				{
@@ -574,6 +572,26 @@ namespace BasicRandomTests
 				printf("reply: %s\n", reply.data);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
+			}
+
+			size_t sizeOfReq(SimpleRequestHeader* req)
+			{
+				if (req->type == 1)
+				{
+					SimpleConditionalWriteHeader* p = (SimpleConditionalWriteHeader*)req;
+					return p->size();
+				}
+				else if (req->type == 2)
+				{
+					SimpleReadHeader* p = (SimpleReadHeader*)req;
+					return p->size();
+				}
+				else if (req->type == 3)
+				{
+					return SimpleGetLastBlockHeader::size();
+				}
+				assert(0); 
+				return 0;
 			}
 		};
 
@@ -703,8 +721,6 @@ namespace BasicRandomTests
 						return false;
 					}
 
-//					printf("\nRead request");  print(p);
-
 					SimpleReplyHeader_Read* pReply = (SimpleReplyHeader_Read*)(outReply);
 					outReplySize = replySize;
 					memset(pReply, 0, replySize);
@@ -726,8 +742,6 @@ namespace BasicRandomTests
 							memset(pReply->elements[i].val, 0, KV_LEN);
 					}
 
-//					printf("\nRead reply");  print((SimpleReplyHeader*)pReply);
-
 					return true;
 
 
@@ -740,7 +754,6 @@ namespace BasicRandomTests
 						CHECK(false, "small message");
 						return false;
 					}
-//					SimpleGetLastBlockHeader* pGetLast = (SimpleGetLastBlockHeader*)command.data;
 
 					if (maxReplySize < sizeof(SimpleReplyHeader_GetLastBlockHeader))
 					{
@@ -763,8 +776,6 @@ namespace BasicRandomTests
 					return false;
 				}
 			}
-
-
 		};
 
 
