@@ -415,7 +415,7 @@ namespace BasicRandomTests
 
 			static void createRandomTest(IClient* client)
 			{
-				InternalTestsBuilder t();
+				InternalTestsBuilder t(1);
 				t.create(client);
 
 				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
@@ -439,7 +439,7 @@ namespace BasicRandomTests
 
 			BlockId m_lastBlockId;
 
-			InternalTestsBuilder() //: m_testPrefix(testPrefix)
+			InternalTestsBuilder(int64_t testPrefix) //: m_testPrefix(testPrefix)
 			{
 				m_lastBlockId = 0;
 			}
