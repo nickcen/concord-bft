@@ -573,7 +573,7 @@ namespace BasicRandomTests
 					SimpleConditionalWriteHeader* p = (SimpleConditionalWriteHeader*)r;
 					printf("\n");
 					printf("Write: version=%" PRId64 " numberOfWrites=%zu keys=", p->readVerion, p->numberOfWrites);
-					SimpleKV* pWritesKVArray = pHeader->keyValArray();
+					SimpleKV* pWritesKVArray = p->keyValArray();
 
 					for (size_t i = 0; i < p->numberOfWrites; i++)
 					{
