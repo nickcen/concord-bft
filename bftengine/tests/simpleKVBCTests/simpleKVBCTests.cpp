@@ -435,7 +435,7 @@ namespace BasicRandomTests
 
 				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, false, reply);
-				print((SimpleReplyHeader*)reply);
+				print((SimpleReplyHeader*)reply.data);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 
@@ -508,7 +508,7 @@ namespace BasicRandomTests
 
 				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, true, reply);
-				print((SimpleReplyHeader*)reply);
+				print((SimpleReplyHeader*)reply.data);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 			}
