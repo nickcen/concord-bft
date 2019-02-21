@@ -476,7 +476,7 @@ namespace BasicRandomTests
 				}
 			}
 
-			SimpleRequestHeader* createAndInsertRandomConditionalWrite()
+			SimpleConditionalWriteHeader* createAndInsertRandomConditionalWrite()
 			{
 				// Create request
 
@@ -577,7 +577,7 @@ namespace BasicRandomTests
 
 				// add request to m_requests
 					// m_requests.push_back((SimpleRequestHeader*)pHeader);
-					return (SimpleRequestHeader*)pHeader;
+					return (SimpleReadHeader*)pHeader;
 				}
 
 				void createAndInsertGetLastBlock()
