@@ -530,6 +530,9 @@ namespace BasicRandomTests
 					std::string k("hello");
 					std::string v("world");
 
+					printf("the size of k is %d\n", k.size());
+					printf("the size of v is %d\n", v.size());
+
 					// size_t v = rand();
 					//memcpy(pWritesKVArray[i].key, &m_testPrefix, sizeof(int64_t));
 					//memcpy(pWritesKVArray[i].val, &m_testPrefix, sizeof(int64_t));
@@ -941,7 +944,7 @@ namespace BasicRandomTests
 
 		Internal::verifyEmptyBlockchain(client);
 
-		assert(requests.size() == expectedReplies.size());
+		// assert(requests.size() == expectedReplies.size());
 
 		int ops = 0;
 
@@ -951,12 +954,10 @@ namespace BasicRandomTests
 		    if(ops % 100 == 0) usleep(100 * 1000);
 #endif			
 			Internal::SimpleRequestHeader* pReq = requests.front();
-			Internal::SimpleReplyHeader* pExpectedRep = expectedReplies.front();
+			
 			requests.pop_front();
-			expectedReplies.pop_front();
 
 			bool readOnly = (pReq->type != 1);
-			size_t expectedReplySize = Internal::sizeOfRep(pExpectedRep);
 
 			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 			Slice reply;
