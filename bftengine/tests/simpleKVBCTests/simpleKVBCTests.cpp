@@ -461,9 +461,6 @@ namespace BasicRandomTests
 			{
 				srand(seed);
 
-				createAndInsertRandomConditionalWrite();
-				createAndInsertRandomRead();
-
 				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
 					it != m_internalBlockchain.end(); it++)
 				{
@@ -861,33 +858,31 @@ namespace BasicRandomTests
 			std::list<Internal::SimpleRequestHeader*> requests;
 			std::list<Internal::SimpleReplyHeader*> expectedReplies;
 
-		Internal::InternalTestsBuilder::createRandomTest(numOfOperations, 1111, INT64_MIN /* INT64_MAX */, requests, expectedReplies);
+			Internal::InternalTestsBuilder::createRandomTest(numOfOperations, 1111, INT64_MIN /* INT64_MAX */, requests, expectedReplies);
 
 			client->start();
 
 			Internal::verifyEmptyBlockchain(client);
 
-		// assert(requests.size() == expectedReplies.size());
+			
+			
 
-			int ops = 0;
+			SimpleConditionalWriteHeader* pReq = createAndInsertRandomConditionalWrite();
+			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
+			Slice reply;
 
-			while (!requests.empty())
-			{
-				Internal::SimpleRequestHeader* pReq = requests.front();
+			printf("--- invokeCommandSynch ===\n");
+			client->invokeCommandSynch(command, false, reply);
+			printf("reply: %s\n", reply.data);
+			printf("==== invokeCommandSynch ===\n");
+			client->release(reply);
 
-				requests.pop_front();
-
-				bool readOnly = (pReq->type != 1);
-
-				Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
-				Slice reply;
-
-				printf("--- invokeCommandSynch ===\n");
-				client->invokeCommandSynch(command, readOnly, reply);
-				printf("reply: %s\n", reply.data);
-				printf("==== invokeCommandSynch ===\n");
-				client->release(reply);
-			}
+			SimpleReadHeader* pReq = createAndInsertRandomRead();
+			printf("--- invokeCommandSynch ===\n");
+			client->invokeCommandSynch(command, true, reply);
+			printf("reply: %s\n", reply.data);
+			printf("==== invokeCommandSynch ===\n");
+			client->release(reply);
 
 			client->stop();
 
