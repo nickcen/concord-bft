@@ -476,7 +476,7 @@ namespace BasicRandomTests
 				}
 			}
 
-			void createAndInsertRandomConditionalWrite()
+			SimpleRequestHeader* createAndInsertRandomConditionalWrite()
 			{
 				// Create request
 
@@ -509,13 +509,11 @@ namespace BasicRandomTests
 
 				strcpy(pWritesKVArray[0].key, k.c_str());
 				strcpy(pWritesKVArray[0].val, v.c_str());
+
 				printf("pwk is %s, size is %lu.\n", pWritesKVArray[0].key, strlen(pWritesKVArray[0].key));
-for(int i = 0; i < 6; i++){
-					printf("%d char is %c, %d\n", i, pWritesKVArray[0].key[i], pWritesKVArray[0].key[i]);
-				}
 
 				// add request to m_requests
-				m_requests.push_back((SimpleRequestHeader*)pHeader);
+				// m_requests.push_back((SimpleRequestHeader*)pHeader);
 
 				// look for conflicts
 				bool foundConflict = false;
@@ -559,6 +557,8 @@ for(int i = 0; i < 6; i++){
 
 						m_internalBlockchain[m_lastBlockId] = pNewBlock;
 					}
+
+					return (SimpleRequestHeader*)pHeader;
 				}
 
 				void createAndInsertRandomRead()
@@ -576,7 +576,7 @@ for(int i = 0; i < 6; i++){
 					pHeader->numberOfKeysToRead = numberOfReads;
 					
 					std::string k("hello");
-					memcpy(pHeader->keys[0].key, &k, k.size());
+					strcpy(pHeader->keys[0].key, k.c_str());
 
 				// add request to m_requests
 					m_requests.push_back((SimpleRequestHeader*)pHeader);
