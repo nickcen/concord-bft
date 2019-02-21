@@ -505,10 +505,10 @@ namespace BasicRandomTests
 				std::string k("hello");
 				std::string v("world");
 
-				printf("k is %s.\n", k.c_str());
+				printf("k is %s.\n", k);
 
-				memcpy(pWritesKVArray[0].key, &k.c_str(), k.size());
-				memcpy(pWritesKVArray[0].val, &v.c_str(), v.size());
+				memcpy(pWritesKVArray[0].key, &k, k.size() + 1);
+				memcpy(pWritesKVArray[0].val, &v, v.size() + 1);
 
 				printf("pwk is %s.\n", pWritesKVArray[0].key);
 
