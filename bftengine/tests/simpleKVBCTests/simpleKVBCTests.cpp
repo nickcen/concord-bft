@@ -587,6 +587,8 @@ namespace BasicRandomTests
 				if (r->type == 1)
 				{
 					SimpleReplyHeader_ConditionalWrite* p = (SimpleReplyHeader_ConditionalWrite*) r;
+					printf("\n");
+					printf("Write reply: latestBlock=%zu\n", p->latestBlock);
 				}
 				else if (r->type == 2)
 				{
@@ -607,7 +609,6 @@ namespace BasicRandomTests
 						printf(" >");
 						printf("\n");
 					}
-
 				}
 				else if (r->type == 3)
 				{
