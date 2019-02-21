@@ -316,39 +316,6 @@ namespace BasicRandomTests
 			BlockId latestBlock;
 		};
 
-
-		static void print(SimpleReplyHeader* r)
-		{			
-			if (r->type == 1)
-			{
-			}
-			else if (r->type == 2)
-			{
-
-				SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)r;
-				printf("\n");
-				printf("Read reply: numOfelements=%zu", p->numberOfElements);
-				for (size_t i = 0; i < p->numberOfElements; i++)
-				{
-					printf("%4s", " ");
-					printf("< ");
-					for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].key[k]);
-						printf(" ; ");
-					for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].val[k]);
-						printf(" >");
-				}
-
-			}
-			else if (r->type == 3)
-			{
-
-			}
-			else
-			{
-				assert(0);
-			}			
-		}
-
 		// internal types
 		class SimpleKIDPair // represents <key,blockId>
 		{
@@ -468,7 +435,7 @@ namespace BasicRandomTests
 
 				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, false, reply);
-				printf("reply: %s\n", reply.data);
+				print((SimpleReplyHeader*)reply);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 
@@ -541,7 +508,7 @@ namespace BasicRandomTests
 
 				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, true, reply);
-				printf("reply: %s\n", reply.data);
+				print((SimpleReplyHeader*)reply);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 			}
@@ -572,36 +539,37 @@ namespace BasicRandomTests
 				{
 					SimpleConditionalWriteHeader* p = (SimpleConditionalWriteHeader*)r;
 					printf("\n");
-					printf("Write: version=%" PRId64 " numberOfWrites=%zu keys=", p->readVerion, p->numberOfWrites);
+					printf("Write: version=%" PRId64 " numberOfWrites=%zu\n", p->readVerion, p->numberOfWrites);
 					SimpleKV* pWritesKVArray = p->keyValArray();
 
 					for (size_t i = 0; i < p->numberOfWrites; i++)
 					{
 						printf("%4s", " ");
+						printf("< ");
 						for (int k = 0; k < KV_LEN; k++){
 							printf("%02X", pWritesKVArray[i].key[k]);
 						}
-						printf("\n");
-						for (int v = 0; v < KV_LEN; v++){
-							printf("%02X", pWritesKVArray[i].val[v]);
+						printf(" ; ");
+						for (int k = 0; k < KV_LEN; k++){ 
+							printf("%02X", pWritesKVArray[i].val[k]);
 						}
+						printf(" >");
 						printf("\n");
 					}
-					printf("\n");
+					
 				}
 				else if (r->type == 2)
 				{
 					SimpleReadHeader* p = (SimpleReadHeader*)r;
 					printf("\n");
-					printf("Read: version=%" PRId64 " numberOfKeysToRead=%zu keys=", p->readVerion, p->numberOfKeysToRead);
+					printf("Read: version=%" PRId64 " numberOfKeysToRead=%zu\n", p->readVerion, p->numberOfKeysToRead);
 					for (size_t i = 0; i < p->numberOfKeysToRead; i++)
 					{
-						printf("%4s", " ");
+						printf("keys_%d= ", i);
 						for (int k = 0; k < KV_LEN; k++){
 							printf("%02X", p->keys[i].key[k]);
 						} 
 					}
-					printf("\n");
 				}
 				else if (r->type == 3)
 				{
@@ -611,6 +579,45 @@ namespace BasicRandomTests
 				{
 					assert(0);
 				}			
+				printf("\n");
+			}
+
+			static void print(SimpleReplyHeader* r)
+			{			
+				if (r->type == 1)
+				{
+					SimpleReplyHeader_ConditionalWrite* p = (SimpleReplyHeader_ConditionalWrite*) r;
+				}
+				else if (r->type == 2)
+				{
+					SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)r;
+					printf("\n");
+					printf("Read reply: numOfelements=%zu\n", p->numberOfElements);
+					for (size_t i = 0; i < p->numberOfElements; i++)
+					{
+						printf("%4s", " ");
+						printf("< ");
+						for (int k = 0; k < KV_LEN; k++){
+							printf("%02X", p->elements[i].key[k]);
+						}
+						printf(" ; ");
+						for (int k = 0; k < KV_LEN; k++){ 
+							printf("%02X", p->elements[i].val[k]);
+						}
+						printf(" >");
+						printf("\n");
+					}
+
+				}
+				else if (r->type == 3)
+				{
+
+				}
+				else
+				{
+					assert(0);
+				}
+				printf("\n");
 			}
 		};
 
