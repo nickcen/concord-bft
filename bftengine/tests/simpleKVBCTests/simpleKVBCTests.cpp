@@ -527,8 +527,8 @@ namespace BasicRandomTests
 					// } while (usedKeys.count(k) > 0);
 					// usedKeys.insert(k);
 
-					string k = "hello";
-					string v = "world";
+					std::string k("hello");
+					std::string v("world");
 
 					// size_t v = rand();
 					//memcpy(pWritesKVArray[i].key, &m_testPrefix, sizeof(int64_t));
