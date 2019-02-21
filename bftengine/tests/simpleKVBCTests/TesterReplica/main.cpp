@@ -146,6 +146,7 @@ int main(int argc, char **argv) {
 	c.viewChangeTimerMillisec = 45 * 1000;
 	c.maxBlockSize = 2 * 1024 * 1024;  // 2MB
 
+	printf("hahahahahahaahhaha we are here");
 
 	IReplica* r = createReplica(c, comm, BasicRandomTests::commandsHandler());
 
