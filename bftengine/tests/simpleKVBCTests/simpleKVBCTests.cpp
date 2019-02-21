@@ -512,9 +512,6 @@ namespace BasicRandomTests
 
 				printf("pwk is %s, size is %lu.\n", pWritesKVArray[0].key, strlen(pWritesKVArray[0].key));
 
-				// add request to m_requests
-				// m_requests.push_back((SimpleRequestHeader*)pHeader);
-
 				// look for conflicts
 				bool foundConflict = false;
 				for (BlockId i = readVer + 1; (i <= m_lastBlockId) && !foundConflict; i++)
@@ -561,7 +558,7 @@ namespace BasicRandomTests
 					return (SimpleRequestHeader*)pHeader;
 				}
 
-				void createAndInsertRandomRead()
+				SimpleReadHeader* createAndInsertRandomRead()
 				{
 				// Create request
 
@@ -579,7 +576,8 @@ namespace BasicRandomTests
 					strcpy(pHeader->keys[0].key, k.c_str());
 
 				// add request to m_requests
-					m_requests.push_back((SimpleRequestHeader*)pHeader);
+					// m_requests.push_back((SimpleRequestHeader*)pHeader);
+					return (SimpleRequestHeader*)pHeader;
 				}
 
 				void createAndInsertGetLastBlock()
