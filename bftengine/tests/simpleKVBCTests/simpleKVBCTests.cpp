@@ -413,8 +413,6 @@ namespace BasicRandomTests
 		{
 			friend void BasicRandomTests::run(IClient* client, const size_t numOfOperations);
 
-
-
 			static void createRandomTest(size_t numOfRequests, size_t seed,
 				int64_t testPrefix,
 				list<SimpleRequestHeader*>& outRequests,
@@ -438,8 +436,6 @@ namespace BasicRandomTests
 				for (list<SimpleReplyHeader*>::iterator it = outReplies.begin(); it != outReplies.end(); it++)
 					SimpleReplyHeader::free(*it);
 			}
-
-//			const int64_t m_testPrefix; // TODO(GG): can be used to support multi-executions of the test on the same blockchain
 
 			std::list<SimpleRequestHeader*> m_requests;
 			std::list<SimpleReplyHeader*> m_replies;
@@ -474,9 +470,6 @@ namespace BasicRandomTests
 			{
 				// Create request
 
-				BlockId readVer = m_lastBlockId;
-				if (m_lastBlockId > CONFLICT_DISTANCE) readVer -= (rand() % CONFLICT_DISTANCE);
-
 				size_t numberOfWrites = 1;
 				size_t numberOfKeysInReadSet = 0;
 
@@ -484,7 +477,7 @@ namespace BasicRandomTests
 
 				// fill request
 				pHeader->h.type = 1;
-				pHeader->readVerion = readVer;
+				pHeader->readVerion = 0;
 				pHeader->numberOfKeysInReadSet = numberOfKeysInReadSet;
 				pHeader->numberOfWrites = numberOfWrites;
 				SimpleKey* pReadKeysArray = pHeader->readSetArray();
@@ -555,15 +548,13 @@ namespace BasicRandomTests
 				SimpleReadHeader* createAndInsertRandomRead()
 				{
 				// Create request
-
-					BlockId readVer = m_lastBlockId;
 					size_t numberOfReads = 1;
 
 					SimpleReadHeader* pHeader = SimpleReadHeader::alloc(numberOfReads);
 
 				// fill request
 					pHeader->h.type = 2;
-					pHeader->readVerion = readVer;
+					pHeader->readVerion = 0;
 					pHeader->numberOfKeysToRead = numberOfReads;
 					
 					std::string k("hello");
@@ -572,27 +563,6 @@ namespace BasicRandomTests
 				// add request to m_requests
 					// m_requests.push_back((SimpleRequestHeader*)pHeader);
 					return pHeader;
-				}
-
-				void createAndInsertGetLastBlock()
-				{
-				// Create request
-
-					SimpleGetLastBlockHeader* pHeader = SimpleGetLastBlockHeader::alloc();
-
-				// fill request
-					pHeader->h.type = 3;
-
-				// add request to m_requests
-					m_requests.push_back((SimpleRequestHeader*)pHeader);
-
-				// compute expected reply
-					SimpleReplyHeader_GetLastBlockHeader* pReply = SimpleReplyHeader_GetLastBlockHeader::alloc();
-					pReply->h.type = 3;
-					pReply->latestBlock = m_lastBlockId;
-
-				// add reply to m_replies
-					m_replies.push_back((SimpleReplyHeader*)pReply);
 				}
 			};
 
@@ -861,10 +831,7 @@ namespace BasicRandomTests
 
 			Internal::verifyEmptyBlockchain(client);
 
-			
-			
-
-			SimpleConditionalWriteHeader* pReq = createAndInsertRandomConditionalWrite();
+			Internal::SimpleConditionalWriteHeader* pReq = Internal::createAndInsertRandomConditionalWrite();
 			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 			Slice reply;
 
@@ -874,7 +841,7 @@ namespace BasicRandomTests
 			printf("==== invokeCommandSynch ===\n");
 			client->release(reply);
 
-			SimpleReadHeader* pReq = createAndInsertRandomRead();
+			Internal::SimpleReadHeader* pReq = Internal::createAndInsertRandomRead();
 			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 			Slice reply;
 
