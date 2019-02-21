@@ -575,7 +575,7 @@ namespace BasicRandomTests
 
 				// fill request
 				pHeader->h.type = 2;
-				pHeader->readVerion = 0;
+				pHeader->readVerion = 1;
 				pHeader->numberOfKeysToRead = numberOfReads;
 
 				std::string k("hello");
@@ -730,6 +730,8 @@ namespace BasicRandomTests
 						return false;
 					}
 					SimpleReadHeader* pRead = (SimpleReadHeader*)command.data;
+					print((SimpleRequestHeader*)pRead);
+
 					if (command.size < pRead->size())
 					{
 						CHECK(false, "small message");
