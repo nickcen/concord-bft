@@ -507,10 +507,12 @@ namespace BasicRandomTests
 
 				printf("k is %s, size is %lu.\n", k.c_str(), k.size());
 
-				memcpy(pWritesKVArray[0].key, &k, k.size() + 1);
-				memcpy(pWritesKVArray[0].val, &v, v.size() + 1);
-
-				printf("pwk is %s.\n", pWritesKVArray[0].key);
+				strcpy(pWritesKVArray[0].key, k.c_str());
+				strcpy(pWritesKVArray[0].val, v.c_str());
+				printf("pwk is %s, size is %lu.\n", pWritesKVArray[0].key, strlen(pWritesKVArray[0].key));
+for(int i = 0; i < 6; i++){
+					printf("%d char is %c, %d\n", i, pWritesKVArray[0].key[i], pWritesKVArray[0].key[i]);
+				}
 
 				// add request to m_requests
 				m_requests.push_back((SimpleRequestHeader*)pHeader);
