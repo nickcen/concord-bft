@@ -878,6 +878,9 @@ namespace BasicRandomTests
 			client->release(reply);
 
 			SimpleReadHeader* pReq = createAndInsertRandomRead();
+			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
+			Slice reply;
+			
 			printf("--- invokeCommandSynch ===\n");
 			client->invokeCommandSynch(command, true, reply);
 			printf("reply: %s\n", reply.data);
