@@ -739,6 +739,7 @@ namespace BasicRandomTests
 						for (size_t i = 0; i < numOfElements; i++)
 						{
 							memcpy(pReply->elements[i].key, keysArray[i].key, KV_LEN);
+							printf("===the key is %s\n", keysArray[i].key);
 							Slice val;
 							Slice k(keysArray[i].key, KV_LEN);
 							BlockId outBlock = 0;
@@ -882,7 +883,7 @@ namespace BasicRandomTests
 
 				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, readOnly, reply);
-				printf("reply: %s\n", reply.data.c_str());
+				printf("reply: %s\n", reply.data);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 			}
