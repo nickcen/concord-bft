@@ -461,20 +461,8 @@ namespace BasicRandomTests
 			{
 				srand(seed);
 
-				for (size_t i = 0; i < numOfRequests; i++)
-				{
-					// int prc = rand() % 100 + 1;
-					// if (prc <= 50)
-					// 	createAndInsertRandomRead();
-					// else if (prc <= 95)
-					// 	createAndInsertRandomConditionalWrite();
-					// else if (prc <= 100)
-					// 	createAndInsertGetLastBlock();
-					// else assert(0);
-
-					createAndInsertRandomConditionalWrite();
-					createAndInsertRandomRead();
-				}
+				createAndInsertRandomConditionalWrite();
+				createAndInsertRandomRead();
 
 				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
 					it != m_internalBlockchain.end(); it++)
@@ -486,8 +474,6 @@ namespace BasicRandomTests
 
 					assert(bId == block->id);
 				}
-
-
 			}
 
 			void createAndInsertRandomConditionalWrite()
@@ -516,19 +502,14 @@ namespace BasicRandomTests
 					memcpy(pReadKeysArray[i].key /*+ sizeof(int64_t)*/, &k, sizeof(size_t));
 				}
 
+				std::string k("hello");
+				std::string v("world");
 
-				std::set<size_t> usedKeys;
-				for (size_t i = 0; i < numberOfWrites; i++)
-				{
-					std::string k("hello");
-					std::string v("world");
+				printf("the size of k is %lu\n", k.size());
+				printf("the size of v is %lu\n", v.size());
 
-					printf("the size of k is %lu\n", k.size());
-					printf("the size of v is %lu\n", v.size());
-
-					memcpy(pWritesKVArray[i].key /*+ sizeof(int64_t)*/, &k, k.size());
-					memcpy(pWritesKVArray[i].val /*+ sizeof(int64_t)*/, &v, v.size());
-				}
+				memcpy(pWritesKVArray[0].key, &k, k.size());
+				memcpy(pWritesKVArray[0].val, &v, v.size());
 
 				// add request to m_requests
 				m_requests.push_back((SimpleRequestHeader*)pHeader);
@@ -577,7 +558,6 @@ namespace BasicRandomTests
 					}
 				}
 
-
 				void createAndInsertRandomRead()
 				{
 				// Create request
@@ -591,12 +571,9 @@ namespace BasicRandomTests
 					pHeader->h.type = 2;
 					pHeader->readVerion = readVer;
 					pHeader->numberOfKeysToRead = numberOfReads;
-
-					for (size_t i = 0; i < numberOfReads; i++)
-					{
-						std::string k("hello");
-						memcpy(pHeader->keys[i].key, &k, k.size());
-					}
+					
+					std::string k("hello");
+					memcpy(pHeader->keys[0].key, &k, k.size());
 
 				// add request to m_requests
 					m_requests.push_back((SimpleRequestHeader*)pHeader);
@@ -622,10 +599,7 @@ namespace BasicRandomTests
 				// add reply to m_replies
 					m_replies.push_back((SimpleReplyHeader*)pReply);
 				}
-
-
 			};
-
 
 			class InternalCommandsHandler : public ICommandsHandler
 			{
@@ -906,9 +880,10 @@ namespace BasicRandomTests
 				Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 				Slice reply;
 
-				printf("==== invokeCommandSynch\n");
+				printf("--- invokeCommandSynch ===\n");
 				client->invokeCommandSynch(command, readOnly, reply);
-				printf("==== invokeCommandSynch return\n");
+				printf("reply: %s\n", reply.data.c_str());
+				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
 			}
 
