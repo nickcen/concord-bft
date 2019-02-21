@@ -319,67 +319,66 @@ namespace BasicRandomTests
 		};
 
 
-		//static void print(SimpleRequestHeader* r)
-		//{
-		//	
-		//	if (r->type == 1)
-		//	{
-		//	}
-		//	else if (r->type == 2)
-		//	{
-		//		
-		//		SimpleReadHeader* p = (SimpleReadHeader*)r;
-		//		printf("\n");
-		//		printf("Read: version=%" PRId64 " numberOfKeysToRead=%zu keys=", p->readVerion, p->numberOfKeysToRead);
-		//		for (size_t i = 0; i < p->numberOfKeysToRead; i++)
-		//		{
-		//			printf("%4s", " ");
-		//			for (int k = 0; k < KV_LEN; k++) printf("%02X", p->keys[i].key[k]);
-		//		}
-		//		
-		//	}
-		//	else if (r->type == 3)
-		//	{
+		static void print(SimpleRequestHeader* r)
+		{
+			if (r->type == 1)
+			{
+			}
+			else if (r->type == 2)
+			{
+				
+				SimpleReadHeader* p = (SimpleReadHeader*)r;
+				printf("\n");
+				printf("Read: version=%" PRId64 " numberOfKeysToRead=%zu keys=", p->readVerion, p->numberOfKeysToRead);
+				for (size_t i = 0; i < p->numberOfKeysToRead; i++)
+				{
+					printf("%4s", " ");
+					for (int k = 0; k < KV_LEN; k++) printf("%02X", p->keys[i].key[k]);
+				}
 
-		//	}
-		//	else
-		//	{
-		//		assert(0);
-		//	}			
-		//}
+		}
+		else if (r->type == 3)
+		{
+
+		}
+		else
+		{
+			assert(0);
+		}			
+	}
 
 
-		//static void print(SimpleReplyHeader* r)
-		//{			
-		//	if (r->type == 1)
-		//	{
-		//	}
-		//	else if (r->type == 2)
-		//	{
-		//		
-		//		SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)r;
-		//		printf("\n");
-		//		printf("Read reply: numOfelements=%zu", p->numberOfElements);
-		//		for (size_t i = 0; i < p->numberOfElements; i++)
-		//		{
-		//			printf("%4s", " ");
-		//			printf("< ");
-		//			for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].key[k]);
-		//			printf(" ; ");
-		//			for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].val[k]);
-		//			printf(" >");
-		//		}
-		//		
-		//	}
-		//	else if (r->type == 3)
-		//	{
+	static void print(SimpleReplyHeader* r)
+	{			
+		if (r->type == 1)
+		{
+		}
+		else if (r->type == 2)
+		{
 
-		//	}
-		//	else
-		//	{
-		//		assert(0);
-		//	}			
-		//}
+			SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)r;
+			printf("\n");
+			printf("Read reply: numOfelements=%zu", p->numberOfElements);
+			for (size_t i = 0; i < p->numberOfElements; i++)
+			{
+				printf("%4s", " ");
+				printf("< ");
+				for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].key[k]);
+					printf(" ; ");
+				for (int k = 0; k < KV_LEN; k++) printf("%02X", p->elements[i].val[k]);
+					printf(" >");
+			}
+
+		}
+		else if (r->type == 3)
+		{
+
+		}
+		else
+		{
+			assert(0);
+		}			
+	}
 
 		// internal types
 		class SimpleKIDPair // represents <key,blockId>
@@ -412,8 +411,6 @@ namespace BasicRandomTests
 
 		class InternalTestsBuilder
 		{
-		private:
-
 			friend void BasicRandomTests::run(IClient* client, const size_t numOfOperations);
 
 
@@ -880,7 +877,7 @@ namespace BasicRandomTests
 			SimpleReadHeader* pReq = createAndInsertRandomRead();
 			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 			Slice reply;
-			
+
 			printf("--- invokeCommandSynch ===\n");
 			client->invokeCommandSynch(command, true, reply);
 			printf("reply: %s\n", reply.data);
