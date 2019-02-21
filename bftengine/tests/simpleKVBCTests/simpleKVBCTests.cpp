@@ -688,6 +688,8 @@ namespace BasicRandomTests
 				char* outReply, size_t& outReplySize) const
 			{
 				printf("Got message of size %zu\n",command.size);
+
+				printf("==== executeCommand\n");
 	
 				//DEBUG_RNAME("InternalCommandsHandler::executeCommand");
 				if (command.size < sizeof(SimpleRequestHeader))
@@ -771,6 +773,7 @@ namespace BasicRandomTests
 				const size_t maxReplySize,
 				char* outReply, size_t& outReplySize) const
 			{
+				printf("==== executeReadOnlyCommand\n");
 				if (command.size < sizeof(SimpleRequestHeader))
 				{
 					CHECK(false, "small message");
@@ -958,6 +961,7 @@ namespace BasicRandomTests
 			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
 			Slice reply;
 
+			printf("==== invokeCommandSynch\n");
 			client->invokeCommandSynch(command, readOnly, reply);
 
 			bool equiv = (reply.size == expectedReplySize);
