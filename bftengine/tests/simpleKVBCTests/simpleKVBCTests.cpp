@@ -573,7 +573,7 @@ namespace BasicRandomTests
 
 				// fill request
 				pHeader->h.type = 2;
-				pHeader->readVerion = 2;
+				pHeader->readVerion = 0;
 				pHeader->numberOfKeysToRead = numberOfReads;
 
 				strcpy(pHeader->keys[0].key, k.c_str());
@@ -753,7 +753,6 @@ namespace BasicRandomTests
 					for (size_t i = 0; i < numOfElements; i++)
 					{
 						memcpy(pReply->elements[i].key, keysArray[i].key, KV_LEN);
-						printf("===the key is %s\n", keysArray[i].key);
 						Slice val;
 						Slice k(keysArray[i].key, KV_LEN);
 						BlockId outBlock = 0;
