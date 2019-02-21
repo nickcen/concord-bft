@@ -441,7 +441,7 @@ namespace BasicRandomTests
 				for (list<SimpleReplyHeader*>::iterator it = outReplies.begin(); it != outReplies.end(); it++)
 					SimpleReplyHeader::free(*it);
 			}
-																		  
+
 //			const int64_t m_testPrefix; // TODO(GG): can be used to support multi-executions of the test on the same blockchain
 
 			std::list<SimpleRequestHeader*> m_requests;
@@ -473,6 +473,7 @@ namespace BasicRandomTests
 					// else assert(0);
 
 					createAndInsertRandomConditionalWrite();
+					createAndInsertRandomRead();
 				}
 
 				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
@@ -496,8 +497,8 @@ namespace BasicRandomTests
 				BlockId readVer = m_lastBlockId;
 				if (m_lastBlockId > CONFLICT_DISTANCE) readVer -= (rand() % CONFLICT_DISTANCE);
 
-				size_t numberOfWrites = 0;
-				size_t numberOfKeysInReadSet = 1;
+				size_t numberOfWrites = 1;
+				size_t numberOfKeysInReadSet = 0;
 
 				SimpleConditionalWriteHeader* pHeader = SimpleConditionalWriteHeader::alloc(numberOfKeysInReadSet, numberOfWrites);
 
@@ -512,7 +513,6 @@ namespace BasicRandomTests
 				for (size_t i = 0; i < numberOfKeysInReadSet; i++)
 				{
 					size_t k = rand() % NUMBER_OF_KEYS;
-					//memcpy(pReadKeysArray[i].key, &m_testPrefix, sizeof(int64_t));
 					memcpy(pReadKeysArray[i].key /*+ sizeof(int64_t)*/, &k, sizeof(size_t));
 				}
 
@@ -520,22 +520,12 @@ namespace BasicRandomTests
 				std::set<size_t> usedKeys;
 				for (size_t i = 0; i < numberOfWrites; i++)
 				{
-					// size_t k = 0;
-					// do  // avoid duplications 
-					// {
-					// 	k = rand() % NUMBER_OF_KEYS;
-					// } while (usedKeys.count(k) > 0);
-					// usedKeys.insert(k);
-
 					std::string k("hello");
 					std::string v("world");
 
 					printf("the size of k is %lu\n", k.size());
 					printf("the size of v is %lu\n", v.size());
 
-					// size_t v = rand();
-					//memcpy(pWritesKVArray[i].key, &m_testPrefix, sizeof(int64_t));
-					//memcpy(pWritesKVArray[i].val, &m_testPrefix, sizeof(int64_t));
 					memcpy(pWritesKVArray[i].key /*+ sizeof(int64_t)*/, &k, k.size());
 					memcpy(pWritesKVArray[i].val /*+ sizeof(int64_t)*/, &v, v.size());
 				}
@@ -555,193 +545,150 @@ namespace BasicRandomTests
 							if (memcmp(pReadKeysArray[a].key, currBlock->items[b].key, KV_LEN) == 0)
 								foundConflict = true;
 						}
-				}
-
-				// // add expected reply to m_replies
-
-				// SimpleReplyHeader_ConditionalWrite* pReply = SimpleReplyHeader_ConditionalWrite::alloc();
-				// pReply->h.type = 1;
-				// if (foundConflict) {
-				// 	pReply->succ = false;	pReply->latestBlock = m_lastBlockId;
-				// }
-				// else {
-				// 	pReply->succ = true;	pReply->latestBlock = m_lastBlockId + 1;
-				// }
-
-				// m_replies.push_back((SimpleReplyHeader*)pReply);
-
-				// // if needed, add new block into the blockchain
-				// if (!foundConflict)
-				// {
-				// 	m_lastBlockId++;
-
-				// 	const size_t N = pHeader->numberOfWrites;
-
-				// 	SimpleBlock* pNewBlock = SimpleBlock::alloc(N);
-
-				// 	pNewBlock->id = m_lastBlockId;
-				// 	pNewBlock->numberOfItems = N;
-
-				// 	for (size_t i = 0; i < N; i++)
-				// 	{
-				// 		pNewBlock->items[i] = pWritesKVArray[i];
-
-				// 		SimpleKey sk;
-				// 		memcpy(sk.key, pWritesKVArray[i].key, KV_LEN);
-
-				// 		SimpleVal sv;
-				// 		memcpy(sv.v, pWritesKVArray[i].val, KV_LEN);
-
-				// 		SimpleKIDPair kiPair(sk, m_lastBlockId);
-				// 		m_map[kiPair] = sv;
-				// 	}
-
-				// 	m_internalBlockchain[m_lastBlockId] = pNewBlock;
-				// }
-			}
-
-
-			void createAndInsertRandomRead()
-			{
-				// Create request
-
-				BlockId readVer = (rand() % (m_lastBlockId + 1));
-				size_t numberOfReads = (rand() % (MAX_READS_IN_REQ - 1)) + 1;
-
-				SimpleReadHeader* pHeader = SimpleReadHeader::alloc(numberOfReads);
-
-				// fill request
-				pHeader->h.type = 2;
-				pHeader->readVerion = readVer;
-				pHeader->numberOfKeysToRead = numberOfReads;
-
-				for (size_t i = 0; i < numberOfReads; i++)
-				{
-					size_t k = rand() % NUMBER_OF_KEYS;
-					//memcpy(pHeader->keys[i].key, &m_testPrefix, sizeof(int64_t));
-					memcpy(pHeader->keys[i].key  /*+ sizeof(int64_t)*/ , &k, sizeof(size_t));
-				}
-
-				// add request to m_requests
-				m_requests.push_back((SimpleRequestHeader*)pHeader);
-
-				// compute expected reply
-				SimpleReplyHeader_Read* pReply = SimpleReplyHeader_Read::alloc(numberOfReads);
-				pReply->h.type = 2;
-				pReply->numberOfElements = numberOfReads;
-
-				for (size_t i = 0; i < numberOfReads; i++)
-				{
-					memcpy(pReply->elements[i].key, pHeader->keys[i].key, KV_LEN);
-
-					SimpleKey sk = pHeader->keys[i];
-
-					SimpleKIDPair kiPair(sk, pHeader->readVerion);
-
-					std::map<SimpleKIDPair, SimpleVal>::const_iterator p = m_map.lower_bound(kiPair);
-
-					if (p != m_map.end() && (pHeader->readVerion >= p->first.blockId) && (memcmp(p->first.key.key, pHeader->keys[i].key, KV_LEN) == 0))
-					{
-						memcpy(pReply->elements[i].val, p->second.v, KV_LEN);
 					}
-					else
+
+				// if needed, add new block into the blockchain
+					if (!foundConflict)
 					{
-						memset(pReply->elements[i].val, 0, KV_LEN);
+						m_lastBlockId++;
+
+						const size_t N = pHeader->numberOfWrites;
+
+						SimpleBlock* pNewBlock = SimpleBlock::alloc(N);
+
+						pNewBlock->id = m_lastBlockId;
+						pNewBlock->numberOfItems = N;
+
+						for (size_t i = 0; i < N; i++)
+						{
+							pNewBlock->items[i] = pWritesKVArray[i];
+
+							SimpleKey sk;
+							memcpy(sk.key, pWritesKVArray[i].key, KV_LEN);
+
+							SimpleVal sv;
+							memcpy(sv.v, pWritesKVArray[i].val, KV_LEN);
+
+							SimpleKIDPair kiPair(sk, m_lastBlockId);
+							m_map[kiPair] = sv;
+						}
+
+						m_internalBlockchain[m_lastBlockId] = pNewBlock;
 					}
 				}
 
-				// add reply to m_replies
 
-				m_replies.push_back((SimpleReplyHeader*)pReply);
-			}
-
-			void createAndInsertGetLastBlock()
-			{
+				void createAndInsertRandomRead()
+				{
 				// Create request
 
-				SimpleGetLastBlockHeader* pHeader = SimpleGetLastBlockHeader::alloc();
+					BlockId readVer = m_lastBlockId;
+					size_t numberOfReads = 1;
+
+					SimpleReadHeader* pHeader = SimpleReadHeader::alloc(numberOfReads);
 
 				// fill request
-				pHeader->h.type = 3;
+					pHeader->h.type = 2;
+					pHeader->readVerion = readVer;
+					pHeader->numberOfKeysToRead = numberOfReads;
+
+					for (size_t i = 0; i < numberOfReads; i++)
+					{
+						std::string k("hello");
+						memcpy(pHeader->keys[i].key, &k, k.size());
+					}
 
 				// add request to m_requests
-				m_requests.push_back((SimpleRequestHeader*)pHeader);
+					m_requests.push_back((SimpleRequestHeader*)pHeader);
+				}
+
+				void createAndInsertGetLastBlock()
+				{
+				// Create request
+
+					SimpleGetLastBlockHeader* pHeader = SimpleGetLastBlockHeader::alloc();
+
+				// fill request
+					pHeader->h.type = 3;
+
+				// add request to m_requests
+					m_requests.push_back((SimpleRequestHeader*)pHeader);
 
 				// compute expected reply
-				SimpleReplyHeader_GetLastBlockHeader* pReply = SimpleReplyHeader_GetLastBlockHeader::alloc();
-				pReply->h.type = 3;
-				pReply->latestBlock = m_lastBlockId;
+					SimpleReplyHeader_GetLastBlockHeader* pReply = SimpleReplyHeader_GetLastBlockHeader::alloc();
+					pReply->h.type = 3;
+					pReply->latestBlock = m_lastBlockId;
 
 				// add reply to m_replies
-				m_replies.push_back((SimpleReplyHeader*)pReply);
-			}
+					m_replies.push_back((SimpleReplyHeader*)pReply);
+				}
 
 
-		};
+			};
 
 
-		class InternalCommandsHandler : public ICommandsHandler
-		{
-		public:
-
-			virtual bool executeCommand(const Slice command,
-				const ILocalKeyValueStorageReadOnly& roStorage,
-				IBlocksAppender& blockAppender,
-				const size_t maxReplySize,
-				char* outReply, size_t& outReplySize) const
+			class InternalCommandsHandler : public ICommandsHandler
 			{
-				printf("Got message of size %zu\n",command.size);
+			public:
 
-				printf("==== executeCommand\n");
-	
+				virtual bool executeCommand(const Slice command,
+					const ILocalKeyValueStorageReadOnly& roStorage,
+					IBlocksAppender& blockAppender,
+					const size_t maxReplySize,
+					char* outReply, size_t& outReplySize) const
+				{
+					printf("Got message of size %zu\n",command.size);
+
+					printf("==== executeCommand\n");
+
 				//DEBUG_RNAME("InternalCommandsHandler::executeCommand");
-				if (command.size < sizeof(SimpleRequestHeader))
-				{
-					CHECK(false, "small message");
-					return false;
-				}
-				SimpleRequestHeader* p = (SimpleRequestHeader*)command.data;
-				if (p->type != 1) return executeReadOnlyCommand(command, roStorage, maxReplySize, outReply, outReplySize);
+					if (command.size < sizeof(SimpleRequestHeader))
+					{
+						CHECK(false, "small message");
+						return false;
+					}
+					SimpleRequestHeader* p = (SimpleRequestHeader*)command.data;
+					if (p->type != 1) return executeReadOnlyCommand(command, roStorage, maxReplySize, outReply, outReplySize);
 
 				// conditional write
 
-				if (command.size < sizeof(SimpleConditionalWriteHeader))
-				{
-					CHECK(false, "small message");
-					return false;
-				}
-				SimpleConditionalWriteHeader* pCondWrite = (SimpleConditionalWriteHeader*)command.data;
-				if (command.size < pCondWrite->size())
-				{
-					CHECK(false, "small message");
-					return false;
-				}
+					if (command.size < sizeof(SimpleConditionalWriteHeader))
+					{
+						CHECK(false, "small message");
+						return false;
+					}
+					SimpleConditionalWriteHeader* pCondWrite = (SimpleConditionalWriteHeader*)command.data;
+					if (command.size < pCondWrite->size())
+					{
+						CHECK(false, "small message");
+						return false;
+					}
 
-				SimpleKey* readSetArray = pCondWrite->readSetArray();
+					SimpleKey* readSetArray = pCondWrite->readSetArray();
 
-				BlockId currBlock = roStorage.getLastBlock();
+					BlockId currBlock = roStorage.getLastBlock();
 
 				// look for conflicts
-				bool hasConflict = false;
-				for (size_t i = 0; !hasConflict && i < pCondWrite->numberOfKeysInReadSet; i++)
-				{
-					Slice key(readSetArray[i].key, KV_LEN);
-					roStorage.mayHaveConflictBetween(key, pCondWrite->readVerion + 1, currBlock, hasConflict);
-				}
+					bool hasConflict = false;
+					for (size_t i = 0; !hasConflict && i < pCondWrite->numberOfKeysInReadSet; i++)
+					{
+						Slice key(readSetArray[i].key, KV_LEN);
+						roStorage.mayHaveConflictBetween(key, pCondWrite->readVerion + 1, currBlock, hasConflict);
+					}
 
-				if (!hasConflict)
-				{
-					SimpleKV* keyValArray = pCondWrite->keyValArray();
-					SetOfKeyValuePairs updates;
+					if (!hasConflict)
+					{
+						SimpleKV* keyValArray = pCondWrite->keyValArray();
+						SetOfKeyValuePairs updates;
 
 					//printf("\nAdding BlockId=%" PRId64 " ", currBlock + 1);
 
-					for (size_t i = 0; i < pCondWrite->numberOfWrites; i++)
-					{
-						Slice key(keyValArray[i].key, KV_LEN);
-						Slice val(keyValArray[i].val, KV_LEN);
-						KeyValuePair kv(key, val);
-						updates.insert(kv);
+						for (size_t i = 0; i < pCondWrite->numberOfWrites; i++)
+						{
+							Slice key(keyValArray[i].key, KV_LEN);
+							Slice val(keyValArray[i].val, KV_LEN);
+							KeyValuePair kv(key, val);
+							updates.insert(kv);
 						//printf("\n");
 						//for (int k = 0; k < sizeof(size_t); k++)
 						//	printf("%02X", key.data()[k]);
@@ -749,236 +696,233 @@ namespace BasicRandomTests
 						//for (int k = 0; k < sizeof(size_t); k++)
 						//	printf("%02X", val.data()[k]);
 
-					}
+						}
 					//printf("\n\n");
-					BlockId newBlockId = 0;
-					Status addSucc = blockAppender.addBlock(updates, newBlockId);
-					assert(addSucc.ok());
-					assert(newBlockId == currBlock + 1);
+						BlockId newBlockId = 0;
+						Status addSucc = blockAppender.addBlock(updates, newBlockId);
+						assert(addSucc.ok());
+						assert(newBlockId == currBlock + 1);
+					}
+
+					assert(sizeof(SimpleReplyHeader_ConditionalWrite) <= maxReplySize);
+					SimpleReplyHeader_ConditionalWrite* pReply = (SimpleReplyHeader_ConditionalWrite*)outReply;
+					memset(pReply, 0, sizeof(SimpleReplyHeader_ConditionalWrite));
+					pReply->h.type = 1;
+					pReply->succ = (!hasConflict);
+					if (!hasConflict)
+						pReply->latestBlock = currBlock + 1;
+					else
+						pReply->latestBlock = currBlock;
+
+					outReplySize = sizeof(SimpleReplyHeader_ConditionalWrite);
+					return true;
 				}
 
-				assert(sizeof(SimpleReplyHeader_ConditionalWrite) <= maxReplySize);
-				SimpleReplyHeader_ConditionalWrite* pReply = (SimpleReplyHeader_ConditionalWrite*)outReply;
-				memset(pReply, 0, sizeof(SimpleReplyHeader_ConditionalWrite));
-				pReply->h.type = 1;
-				pReply->succ = (!hasConflict);
-				if (!hasConflict)
-					pReply->latestBlock = currBlock + 1;
-				else
-					pReply->latestBlock = currBlock;
-
-				outReplySize = sizeof(SimpleReplyHeader_ConditionalWrite);
-				return true;
-			}
-
-			virtual bool executeReadOnlyCommand(const Slice command,
-				const ILocalKeyValueStorageReadOnly& roStorage,
-				const size_t maxReplySize,
-				char* outReply, size_t& outReplySize) const
-			{
-				printf("==== executeReadOnlyCommand\n");
-				if (command.size < sizeof(SimpleRequestHeader))
+				virtual bool executeReadOnlyCommand(const Slice command,
+					const ILocalKeyValueStorageReadOnly& roStorage,
+					const size_t maxReplySize,
+					char* outReply, size_t& outReplySize) const
 				{
-					CHECK(false, "small message");
-					return false;
-				}
-				SimpleRequestHeader* p = (SimpleRequestHeader*)command.data;
-				if (p->type == 2)
-				{
+					printf("==== executeReadOnlyCommand\n");
+					if (command.size < sizeof(SimpleRequestHeader))
+					{
+						CHECK(false, "small message");
+						return false;
+					}
+					SimpleRequestHeader* p = (SimpleRequestHeader*)command.data;
+					if (p->type == 2)
+					{
 					// read
-					if (command.size < sizeof(SimpleReadHeader))
-					{
-						CHECK(false, "small message");
-						return false;
-					}
-					SimpleReadHeader* pRead = (SimpleReadHeader*)command.data;
-					if (command.size < pRead->size())
-					{
-						CHECK(false, "small message");
-						return false;
-					}
-					size_t numOfElements = pRead->numberOfKeysToRead;
-					size_t replySize = SimpleReplyHeader_Read::size(numOfElements);
+						if (command.size < sizeof(SimpleReadHeader))
+						{
+							CHECK(false, "small message");
+							return false;
+						}
+						SimpleReadHeader* pRead = (SimpleReadHeader*)command.data;
+						if (command.size < pRead->size())
+						{
+							CHECK(false, "small message");
+							return false;
+						}
+						size_t numOfElements = pRead->numberOfKeysToRead;
+						size_t replySize = SimpleReplyHeader_Read::size(numOfElements);
 
-					if (maxReplySize < replySize)
-					{
-						CHECK(false, "small message");
-						return false;
-					}
+						if (maxReplySize < replySize)
+						{
+							CHECK(false, "small message");
+							return false;
+						}
 
 //					printf("\nRead request");  print(p);
 
-					SimpleReplyHeader_Read* pReply = (SimpleReplyHeader_Read*)(outReply);
-					outReplySize = replySize;
-					memset(pReply, 0, replySize);
-					pReply->h.type = 2;
-					pReply->numberOfElements = numOfElements;
+						SimpleReplyHeader_Read* pReply = (SimpleReplyHeader_Read*)(outReply);
+						outReplySize = replySize;
+						memset(pReply, 0, replySize);
+						pReply->h.type = 2;
+						pReply->numberOfElements = numOfElements;
 
-					SimpleKey* keysArray = pRead->keysArray();
-					for (size_t i = 0; i < numOfElements; i++)
-					{
-						memcpy(pReply->elements[i].key, keysArray[i].key, KV_LEN);
-						Slice val;
-						Slice k(keysArray[i].key, KV_LEN);
-						BlockId outBlock = 0;
-						roStorage.get(pRead->readVerion, k, val, outBlock);
-						if (val.size > 0)
-							memcpy(pReply->elements[i].val, val.data, KV_LEN);
-						else
-							memset(pReply->elements[i].val, 0, KV_LEN);
-					}
+						SimpleKey* keysArray = pRead->keysArray();
+						for (size_t i = 0; i < numOfElements; i++)
+						{
+							memcpy(pReply->elements[i].key, keysArray[i].key, KV_LEN);
+							Slice val;
+							Slice k(keysArray[i].key, KV_LEN);
+							BlockId outBlock = 0;
+							roStorage.get(pRead->readVerion, k, val, outBlock);
+							if (val.size > 0)
+								memcpy(pReply->elements[i].val, val.data, KV_LEN);
+							else
+								memset(pReply->elements[i].val, 0, KV_LEN);
+						}
 
 //					printf("\nRead reply");  print((SimpleReplyHeader*)pReply);
 
-					return true;
+						return true;
 
 
-				}
-				else if (p->type == 3)
-				{
-					// read
-					if (command.size < sizeof(SimpleGetLastBlockHeader))
-					{
-						CHECK(false, "small message");
-						return false;
 					}
+					else if (p->type == 3)
+					{
+					// read
+						if (command.size < sizeof(SimpleGetLastBlockHeader))
+						{
+							CHECK(false, "small message");
+							return false;
+						}
 //					SimpleGetLastBlockHeader* pGetLast = (SimpleGetLastBlockHeader*)command.data;
 
-					if (maxReplySize < sizeof(SimpleReplyHeader_GetLastBlockHeader))
+						if (maxReplySize < sizeof(SimpleReplyHeader_GetLastBlockHeader))
+						{
+							CHECK(false, "small message");
+							return false;
+						}
+
+						SimpleReplyHeader_GetLastBlockHeader* pReply = (SimpleReplyHeader_GetLastBlockHeader*)(outReply);
+						outReplySize = sizeof(SimpleReplyHeader_GetLastBlockHeader);
+						memset(pReply, 0, sizeof(SimpleReplyHeader_GetLastBlockHeader));
+						pReply->h.type = 3;
+						pReply->latestBlock = roStorage.getLastBlock();
+
+						return true;
+					}
+					else
 					{
-						CHECK(false, "small message");
+						outReplySize = 0;
+						CHECK(false, "illegal message");
 						return false;
 					}
-
-					SimpleReplyHeader_GetLastBlockHeader* pReply = (SimpleReplyHeader_GetLastBlockHeader*)(outReply);
-					outReplySize = sizeof(SimpleReplyHeader_GetLastBlockHeader);
-					memset(pReply, 0, sizeof(SimpleReplyHeader_GetLastBlockHeader));
-					pReply->h.type = 3;
-					pReply->latestBlock = roStorage.getLastBlock();
-
-					return true;
 				}
-				else
+
+
+			};
+
+
+			static size_t sizeOfReq(SimpleRequestHeader* req)
+			{
+				if (req->type == 1)
 				{
-					outReplySize = 0;
-					CHECK(false, "illegal message");
-					return false;
+					SimpleConditionalWriteHeader* p = (SimpleConditionalWriteHeader*)req;
+					return p->size();
 				}
+				else if (req->type == 2)
+				{
+					SimpleReadHeader* p = (SimpleReadHeader*)req;
+					return p->size();
+				}
+				else if (req->type == 3)
+				{
+					return SimpleGetLastBlockHeader::size();
+				}
+				assert(0); 
+				return 0;
 			}
 
-
-		};
-
-
-		static size_t sizeOfReq(SimpleRequestHeader* req)
-		{
-			if (req->type == 1)
+			static size_t sizeOfRep(SimpleReplyHeader* rep)
 			{
-				SimpleConditionalWriteHeader* p = (SimpleConditionalWriteHeader*)req;
-				return p->size();
+				if (rep->type == 1)
+				{
+					return sizeof(SimpleReplyHeader_ConditionalWrite);
+				}
+				else if (rep->type == 2)
+				{
+					SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)rep;
+					return p->size();
+				}
+				else if (rep->type == 3)
+				{
+					return sizeof(SimpleReplyHeader_GetLastBlockHeader);
+				}
+				assert(0); 
+				return 0;
 			}
-			else if (req->type == 2)
+
+
+			static void verifyEmptyBlockchain(IClient* client)
 			{
-				SimpleReadHeader* p = (SimpleReadHeader*)req;
-				return p->size();
+				SimpleGetLastBlockHeader* p = SimpleGetLastBlockHeader::alloc();
+				p->h.type = 3;
+				Slice command((const char*)p, sizeof(SimpleGetLastBlockHeader));
+				Slice reply;
+
+				client->invokeCommandSynch(command, true, reply);
+
+				assert(reply.size == sizeof(SimpleReplyHeader_GetLastBlockHeader));
+
+				SimpleReplyHeader_GetLastBlockHeader* pReplyData = (SimpleReplyHeader_GetLastBlockHeader*)reply.data;
+				(void)pReplyData;
+
+				assert(pReplyData->h.type == 3);
+				assert(pReplyData->latestBlock == 0);
+
+				client->release(reply);
 			}
-			else if (req->type == 3)
-			{
-				return SimpleGetLastBlockHeader::size();
-			}
-			assert(0); 
-			return 0;
 		}
 
-		static size_t sizeOfRep(SimpleReplyHeader* rep)
+		void run(IClient* client, const size_t numOfOperations)
 		{
-			if (rep->type == 1)
-			{
-				return sizeof(SimpleReplyHeader_ConditionalWrite);
-			}
-			else if (rep->type == 2)
-			{
-				SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)rep;
-				return p->size();
-			}
-			else if (rep->type == 3)
-			{
-				return sizeof(SimpleReplyHeader_GetLastBlockHeader);
-			}
-			assert(0); 
-			return 0;
-		}
+			assert(!client->isRunning());
 
-
-		static void verifyEmptyBlockchain(IClient* client)
-		{
-			SimpleGetLastBlockHeader* p = SimpleGetLastBlockHeader::alloc();
-			p->h.type = 3;
-			Slice command((const char*)p, sizeof(SimpleGetLastBlockHeader));
-			Slice reply;
-
-			client->invokeCommandSynch(command, true, reply);
-
-			assert(reply.size == sizeof(SimpleReplyHeader_GetLastBlockHeader));
-
-			SimpleReplyHeader_GetLastBlockHeader* pReplyData = (SimpleReplyHeader_GetLastBlockHeader*)reply.data;
-			(void)pReplyData;
-
-			assert(pReplyData->h.type == 3);
-			assert(pReplyData->latestBlock == 0);
-
-			client->release(reply);
-		}
-	}
-
-	void run(IClient* client, const size_t numOfOperations)
-	{
-		assert(!client->isRunning());
-
-		std::list<Internal::SimpleRequestHeader*> requests;
-		std::list<Internal::SimpleReplyHeader*> expectedReplies;
+			std::list<Internal::SimpleRequestHeader*> requests;
+			std::list<Internal::SimpleReplyHeader*> expectedReplies;
 
 		Internal::InternalTestsBuilder::createRandomTest(numOfOperations, 1111, INT64_MIN /* INT64_MAX */, requests, expectedReplies);
 
-		client->start();
+			client->start();
 
-		Internal::verifyEmptyBlockchain(client);
+			Internal::verifyEmptyBlockchain(client);
 
 		// assert(requests.size() == expectedReplies.size());
 
-		int ops = 0;
+			int ops = 0;
 
-		while (!requests.empty())
-		{
-#ifndef _WIN32
-		    if(ops % 100 == 0) usleep(100 * 1000);
-#endif			
-			Internal::SimpleRequestHeader* pReq = requests.front();
-			
-			requests.pop_front();
+			while (!requests.empty())
+			{
+				Internal::SimpleRequestHeader* pReq = requests.front();
 
-			bool readOnly = (pReq->type != 1);
+				requests.pop_front();
 
-			Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
-			Slice reply;
+				bool readOnly = (pReq->type != 1);
 
-			printf("==== invokeCommandSynch\n");
-			client->invokeCommandSynch(command, readOnly, reply);
-			printf("==== invokeCommandSynch return\n");
-			client->release(reply);
+				Slice command((const char*)pReq, Internal::sizeOfReq(pReq));
+				Slice reply;
+
+				printf("==== invokeCommandSynch\n");
+				client->invokeCommandSynch(command, readOnly, reply);
+				printf("==== invokeCommandSynch return\n");
+				client->release(reply);
+			}
+
+			client->stop();
+
+			Internal::InternalTestsBuilder::free(requests, expectedReplies);
+
+			getchar();
+
 		}
 
-		client->stop();
 
-		Internal::InternalTestsBuilder::free(requests, expectedReplies);
-
-		getchar();
-
+		ICommandsHandler* commandsHandler()
+		{
+			return new Internal::InternalCommandsHandler();
+		}
 	}
-
-
-	ICommandsHandler* commandsHandler()
-	{
-		return new Internal::InternalCommandsHandler();
-	}
-}
