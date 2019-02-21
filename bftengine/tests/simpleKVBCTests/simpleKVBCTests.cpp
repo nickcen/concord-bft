@@ -555,7 +555,7 @@ namespace BasicRandomTests
 						m_internalBlockchain[m_lastBlockId] = pNewBlock;
 					}
 
-					return (SimpleRequestHeader*)pHeader;
+					return pHeader;
 				}
 
 				SimpleReadHeader* createAndInsertRandomRead()
@@ -577,7 +577,7 @@ namespace BasicRandomTests
 
 				// add request to m_requests
 					// m_requests.push_back((SimpleRequestHeader*)pHeader);
-					return (SimpleReadHeader*)pHeader;
+					return pHeader;
 				}
 
 				void createAndInsertGetLastBlock()
