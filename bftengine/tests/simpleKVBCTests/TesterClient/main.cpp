@@ -37,6 +37,8 @@
 #include "concord.grpc.pb.h"
 
 using namespace SimpleKVBC;
+
+using std::string;
 																						 
 int main(int argc, char **argv) {
 #if defined(_WIN32)
