@@ -455,12 +455,6 @@ namespace BasicRandomTests
 
 		// 	return t;
 		// }
-
-		Stub(IClient* client) 
-		{
-
-		}
-
 		size_t sizeOfReq(SimpleRequestHeader* req)
 		{
 			if (req->type == 1)
@@ -672,6 +666,11 @@ namespace BasicRandomTests
 		// client->stop();
 
 		// getchar();
+	}
+
+	IStub* newStub()
+	{
+		return new Stub();
 	}
 
 	ICommandsHandler* commandsHandler()

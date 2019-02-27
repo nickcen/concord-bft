@@ -31,4 +31,5 @@ namespace BasicRandomTests
   };
 
   ICommandsHandler* commandsHandler();
+  IStub* newStub();
 }
