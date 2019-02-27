@@ -847,7 +847,7 @@ namespace BasicRandomTests
 
 		client->start();
 
-		InternalTestsBuilder t = Internal::InternalTestsBuilder::createRandomTest(client);
+		Internal::InternalTestsBuilder t = Internal::InternalTestsBuilder::createRandomTest(client);
 
 		// client->stop();
 
