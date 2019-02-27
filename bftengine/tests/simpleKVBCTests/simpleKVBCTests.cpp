@@ -430,9 +430,9 @@ namespace BasicRandomTests
 
 		class InternalTestsBuilder
 		{
-			friend void BasicRandomTests::run(IClient* client);
+			friend Internal::InternalTestsBuilder BasicRandomTests::run(IClient* client);
 
-			static InternalTestsBuilder createRandomTest(IClient* client)
+			static Internal::InternalTestsBuilder createRandomTest(IClient* client)
 			{
 				InternalTestsBuilder t(1);
 				t.write(client, "k1", "v1");
@@ -841,7 +841,7 @@ namespace BasicRandomTests
 		}
 	}
 
-	InternalTestsBuilder run(IClient* client)
+	Internal::InternalTestsBuilder run(IClient* client)
 	{
 		assert(!client->isRunning());
 
