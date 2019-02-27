@@ -26,7 +26,7 @@ using std::list;
 using std::map;
 using std::set;
 
-#define KV_LEN (21)
+#define KV_LEN (50)
 #define NUMBER_OF_KEYS (200) 
 #define CONFLICT_DISTANCE (49)
 #define MAX_WRITES_IN_REQ (7)
