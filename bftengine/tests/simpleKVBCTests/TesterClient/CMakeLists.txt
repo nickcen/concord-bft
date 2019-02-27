@@ -4,6 +4,8 @@ project(skvbc_client VERSION 0.1.0.0 LANGUAGES CXX)
 set(client_sources
 	main.cpp
 	../simpleKVBCTests.cpp
+  concord.pb.cc
+  concord.grpc.pb.cc
 )
 
 add_executable(skvbc_client ${client_sources})
