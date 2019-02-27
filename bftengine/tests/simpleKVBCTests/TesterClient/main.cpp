@@ -28,9 +28,15 @@
 #include "winUtils.h"
 #endif
 
-using namespace SimpleKVBC;
+#include <iostream>
+#include <memory>
+#include <string>
 
-using std::string;
+#include <grpcpp/grpcpp.h>
+
+#include "concord.grpc.pb.h"
+
+using namespace SimpleKVBC;
 																						 
 int main(int argc, char **argv) {
 #if defined(_WIN32)

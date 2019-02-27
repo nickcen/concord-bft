@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package msgs;
+
+service Concord {
+  rpc Get (GetRequest) returns (GetReply) {}
+  rpc Set (SetRequest) returns (SetReply) {}
+  rpc Delete (DeleteRequest) returns (DeleteReply) {}
+  rpc Init (InitRequest) returns (InitReply) {}
+}
+
+// The request message containing the user's name.
+message GetRequest {
+  string key = 1;
+}
+
+// The response message containing the greetings
+message GetReply {
+  bool ret = 1;
+  string error = 2;
+  bytes value = 3;
+}
+
+message SetRequest {
+  string key = 1;
+  bytes value = 2;
+}
+
+message SetReply {
+  bool ret = 1;
+  string error = 2; 
+}
+
+message DeleteRequest {
+  string key = 1;
+}
+
+message DeleteReply {
+  bool ret = 1;
+  string error = 2; 
+}
+
+message InitRequest {}
+
+message InitReply {}
