@@ -430,7 +430,7 @@ namespace BasicRandomTests
 
 		class InternalTestsBuilder
 		{
-			friend void BasicRandomTests::run(IClient* client, const size_t numOfOperations);
+			friend void BasicRandomTests::run(IClient* client);
 
 			static void createRandomTest(IClient* client)
 			{
