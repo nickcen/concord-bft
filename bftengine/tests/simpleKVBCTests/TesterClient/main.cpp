@@ -70,12 +70,14 @@ public:
 
 	grpc::Status Get(ServerContext* context, const GetRequest* request,
 		GetReply* reply) override {
-		std::cout << "received Get request [" << request->key() << ":]" << std::endl;
+		
 		// printf("==== received Get request [%s:]====\n", request->key());
 
 		std::string value = stub->read(c, request->key());
 
     reply->set_value(value);
+
+    std::cout << "received Get request [" << request->key() << ":" << value << "]" << std::endl;
     // if(pRedisReply->len > 0){
     //   std::cout << "received Get request [" << request->key() << ":" << pRedisReply->str << "]" << std::endl;
     //   reply->set_value(std::string(pRedisReply->str, pRedisReply->len));
@@ -148,7 +150,7 @@ void RunServer(IClient* c) {
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
   c->start();
-  
+
 	server->Wait();
 }
 
