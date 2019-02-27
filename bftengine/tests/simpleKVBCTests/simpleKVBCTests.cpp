@@ -839,15 +839,15 @@ namespace BasicRandomTests
 		}
 	}
 
-	void run(IClient* client, const size_t numOfOperations)
+	void run(IClient* client)
 	{
 		assert(!client->isRunning());
 
 		client->start();
 
-		Internal::InternalTestsBuilder::createRandomTest(client);
+		// Internal::InternalTestsBuilder::createRandomTest(client);
 
-		client->stop();
+		// client->stop();
 
 		getchar();
 	}

@@ -39,6 +39,109 @@
 using namespace SimpleKVBC;
 
 using std::string;
+
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::Status;
+using msgs::GetRequest;
+using msgs::GetReply;
+using msgs::SetRequest;
+using msgs::SetReply;
+using msgs::DeleteRequest;
+using msgs::DeleteReply;
+using msgs::InitRequest;
+using msgs::InitReply;
+using msgs::Concord;
+
+// Logic and data behind the server's behavior.
+class ConcordServiceImpl final : public Concord::Service {
+private: 
+  IClient* c;
+  
+public: 
+
+  ConcordServiceImpl(IClient* rc) 
+  { 
+    c = rc;
+  } 
+  Status Get(ServerContext* context, const GetRequest* request,
+    GetReply* reply) override {
+
+    // const char *k = request->key().c_str();
+
+    // redisReply *pRedisReply = (redisReply*)redisCommand(c, "GET %s", k);
+
+    // if(pRedisReply->len > 0){
+    //   std::cout << "received Get request [" << request->key() << ":" << pRedisReply->str << "]" << std::endl;
+    //   reply->set_value(std::string(pRedisReply->str, pRedisReply->len));
+    // }
+
+    // freeReplyObject(pRedisReply); 
+
+    return Status::OK;
+  }
+
+  Status Set(ServerContext* context, const SetRequest* request,
+    SetReply* reply) override {
+    std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
+
+    // const char *k = request->key().c_str();
+    // const char *v = request->value().c_str();
+    // redisReply *pRedisReply = (redisReply*)redisCommand(c, "SET %s %b", k, v, request->value().length());
+    
+    // freeReplyObject(pRedisReply); 
+
+    return Status::OK;
+  }
+
+  Status Delete(ServerContext* context, const DeleteRequest* request,
+    DeleteReply* reply) override {
+
+    std::cout << "received Delete request [" << request->key() << "]" << std::endl;
+
+    // const char *k = request->key().c_str();
+    // redisReply *pRedisReply = (redisReply*)redisCommand(c, "DEL %s", k);
+    
+    // freeReplyObject(pRedisReply); 
+
+    return Status::OK;
+  }
+
+  Status Init(ServerContext* context, const InitRequest* request,
+    InitReply* reply) override {
+
+    // std::cout << "received Init request " << std::endl;
+    
+    // redisReply *pRedisReply = (redisReply*)redisCommand(c, "flushall");
+    
+    // freeReplyObject(pRedisReply); 
+
+    return Status::OK;
+  }
+};
+
+void RunServer(IClient* c) {
+  std::string server_address("0.0.0.0:50051");
+
+  ConcordServiceImpl service(c);
+
+  ServerBuilder builder;
+  // Listen on the given address without any authentication mechanism.
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+  // Register "service" as the instance through which we'll communicate with
+  // clients. In this case it corresponds to an *synchronous* service.
+  builder.RegisterService(&service);
+  // Finally assemble the server.
+  std::unique_ptr<Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on " << server_address << std::endl;
+
+  // Wait for the server to shutdown. Note that some other thread must be
+  // responsible for shutting down the server for this call to ever return.
+  server->Wait();
+  BasicRandomTests::run(c);
+}
+
 																						 
 int main(int argc, char **argv) {
 #if defined(_WIN32)
@@ -142,7 +245,9 @@ int main(int argc, char **argv) {
 	config.cVal = cVal;
 	config.maxReplySize = maxMsgSize;
 
-	IClient* c = createClient(config, comm);		 
+	IClient* c = createClient(config, comm);	
 
-	BasicRandomTests::run(c, numOfOps);
+	RunServer(c);	 
+
+	// BasicRandomTests::run(c, numOfOps);
 }
