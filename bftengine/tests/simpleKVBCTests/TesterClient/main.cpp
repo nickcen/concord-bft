@@ -57,16 +57,16 @@ using msgs::Concord;
 // Logic and data behind the server's behavior.
 class ConcordServiceImpl final : public Concord::Service {
 private: 
-  IClient* c;
-  
+	IClient* c;
+	
 public: 
 
-  ConcordServiceImpl(IClient* rc) 
-  { 
-    c = rc;
-  } 
-  grpc::Status Get(ServerContext* context, const GetRequest* request,
-    GetReply* reply) override {
+	ConcordServiceImpl(IClient* rc) 
+	{ 
+		c = rc;
+	} 
+	grpc::Status Get(ServerContext* context, const GetRequest* request,
+		GetReply* reply) override {
 
     // const char *k = request->key().c_str();
 
@@ -79,70 +79,70 @@ public:
 
     // freeReplyObject(pRedisReply); 
 
-    return grpc::Status::OK;
-  }
+		return grpc::Status::OK;
+	}
 
-  grpc::Status Set(ServerContext* context, const SetRequest* request,
-    SetReply* reply) override {
-    std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
+	grpc::Status Set(ServerContext* context, const SetRequest* request,
+		SetReply* reply) override {
+		std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
 
     // const char *k = request->key().c_str();
     // const char *v = request->value().c_str();
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "SET %s %b", k, v, request->value().length());
-    
+		
     // freeReplyObject(pRedisReply); 
 
-    return grpc::Status::OK;
-  }
+		return grpc::Status::OK;
+	}
 
-  grpc::Status Delete(ServerContext* context, const DeleteRequest* request,
-    DeleteReply* reply) override {
+	grpc::Status Delete(ServerContext* context, const DeleteRequest* request,
+		DeleteReply* reply) override {
 
-    std::cout << "received Delete request [" << request->key() << "]" << std::endl;
+		std::cout << "received Delete request [" << request->key() << "]" << std::endl;
 
     // const char *k = request->key().c_str();
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "DEL %s", k);
-    
+		
     // freeReplyObject(pRedisReply); 
 
-    return grpc::Status::OK;
-  }
+		return grpc::Status::OK;
+	}
 
-  grpc::Status Init(ServerContext* context, const InitRequest* request,
-    InitReply* reply) override {
+	grpc::Status Init(ServerContext* context, const InitRequest* request,
+		InitReply* reply) override {
 
     // std::cout << "received Init request " << std::endl;
-    
+		
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "flushall");
-    
+		
     // freeReplyObject(pRedisReply); 
 
-    return grpc::Status::OK;
-  }
+		return grpc::Status::OK;
+	}
 };
 
 void RunServer(IClient* c) {
-  std::string server_address("0.0.0.0:50051");
+	std::string server_address("0.0.0.0:50051");
 
-  ConcordServiceImpl service(c);
+	ConcordServiceImpl service(c);
 
-  ServerBuilder builder;
+	ServerBuilder builder;
   // Listen on the given address without any authentication mechanism.
-  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+	builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   // Register "service" as the instance through which we'll communicate with
   // clients. In this case it corresponds to an *synchronous* service.
-  builder.RegisterService(&service);
+	builder.RegisterService(&service);
   // Finally assemble the server.
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+	std::unique_ptr<Server> server(builder.BuildAndStart());
+	std::cout << "Server listening on " << server_address << std::endl;
 
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
-  server->Wait();
-  BasicRandomTests::IStub* stub = new BasicRandomTests::newStub();
+	server->Wait();
+	BasicRandomTests::IStub* stub = BasicRandomTests::newStub();
 }
 
-																						 
+
 int main(int argc, char **argv) {
 #if defined(_WIN32)
 	initWinSock();
@@ -158,56 +158,56 @@ int main(int argc, char **argv) {
 	int o = 0;
 	while ((o = getopt(argc, argv, "i:f:c:p:")) != EOF) {
 		switch (o) {
-		case 'i':
-		{
-			strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
-			argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
-			string idStr = argTempBuffer;
-			int tempId = std::stoi(idStr);
-			if (tempId >= 0 && tempId < UINT16_MAX)
-				clientId = (uint16_t)tempId;
+			case 'i':
+			{
+				strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
+				argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
+				string idStr = argTempBuffer;
+				int tempId = std::stoi(idStr);
+				if (tempId >= 0 && tempId < UINT16_MAX)
+					clientId = (uint16_t)tempId;
 			// TODO: check clientId
-		}
-		break;
+			}
+			break;
 
-		case 'f':
-		{
-			strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
-			argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
-			string fStr = argTempBuffer;
-			int tempfVal = std::stoi(fStr);
-			if (tempfVal >= 1 && tempfVal < UINT16_MAX)
-				fVal = (uint16_t)tempfVal;
+			case 'f':
+			{
+				strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
+				argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
+				string fStr = argTempBuffer;
+				int tempfVal = std::stoi(fStr);
+				if (tempfVal >= 1 && tempfVal < UINT16_MAX)
+					fVal = (uint16_t)tempfVal;
 			// TODO: check fVal
-		}
-		break;
+			}
+			break;
 
-		case 'c':
-		{
-			strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
-			argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
-			string cStr = argTempBuffer;
-			int tempcVal = std::stoi(cStr);
-			if (tempcVal >= 0 && tempcVal < UINT16_MAX)
-				cVal = (uint16_t)tempcVal;
+			case 'c':
+			{
+				strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
+				argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
+				string cStr = argTempBuffer;
+				int tempcVal = std::stoi(cStr);
+				if (tempcVal >= 0 && tempcVal < UINT16_MAX)
+					cVal = (uint16_t)tempcVal;
 			// TODO: check cVal
-		}
-		break;
+			}
+			break;
 
-		case 'p':
-		{
-			strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
-			argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
-			string numOfOpsStr = argTempBuffer;
-			int tempfVal = std::stoi(numOfOpsStr);
-			if (tempfVal >= 1 && tempfVal < UINT32_MAX)
-				numOfOps = (uint32_t)tempfVal;
+			case 'p':
+			{
+				strncpy(argTempBuffer, optarg, sizeof(argTempBuffer) - 1);
+				argTempBuffer[sizeof(argTempBuffer) - 1] = 0;
+				string numOfOpsStr = argTempBuffer;
+				int tempfVal = std::stoi(numOfOpsStr);
+				if (tempfVal >= 1 && tempfVal < UINT32_MAX)
+					numOfOps = (uint32_t)tempfVal;
 			// TODO: check numOfOps
-		}
-		break;
+			}
+			break;
 
 
-		default:
+			default:
 			// nop
 			break;
 		}
@@ -231,8 +231,8 @@ int main(int argc, char **argv) {
 	std::unordered_map <NodeNum, NodeInfo> nodes;
 	for (int i = 0; i < (numOfReplicas + numOfClientProxies); i++) {					
 		nodes.insert({
-		i,
-		NodeInfo{ ipAddress, (uint16_t)(basePort + i * 2), i < numOfReplicas } });
+			i,
+			NodeInfo{ ipAddress, (uint16_t)(basePort + i * 2), i < numOfReplicas } });
 	}
 
 	bftEngine::PlainUdpConfig commConfig(ipAddress, port, maxMsgSize, nodes, clientId);
