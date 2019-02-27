@@ -70,7 +70,8 @@ public:
 
 	grpc::Status Get(ServerContext* context, const GetRequest* request,
 		GetReply* reply) override {
-		printf("==== received Get request [%s:]====\n", request->key());
+		std::cout << "received Get request [" << request->key() << ":]" << std::endl;
+		// printf("==== received Get request [%s:]====\n", request->key());
 
 		std::string value = stub->read(c, request->key());
 
@@ -87,7 +88,8 @@ public:
 
 	grpc::Status Set(ServerContext* context, const SetRequest* request,
 		SetReply* reply) override {
-		printf("==== received Set request [%s:%s]====\n", request->key(), request->value());
+		std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
+		// printf("==== received Set request [%s:%s]====\n", request->key(), request->value());
 
 		stub->write(c, request->key(), request->value());
 
@@ -102,7 +104,8 @@ public:
 
 	grpc::Status Delete(ServerContext* context, const DeleteRequest* request,
 		DeleteReply* reply) override {
-		printf("==== received Delete request [%s:]====\n", request->key());
+		std::cout << "received Delete request [" << request->key() << ":]" << std::endl;
+		// printf("==== received Delete request [%s:]====\n", request->key());
 
     // const char *k = request->key().c_str();
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "DEL %s", k);
