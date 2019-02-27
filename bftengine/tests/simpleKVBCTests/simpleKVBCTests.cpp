@@ -408,7 +408,7 @@ namespace BasicRandomTests
 
 			SimpleReplyHeader_Read* p = (SimpleReplyHeader_Read*)reply.data;
 
-			std::string value = std::string(p->elements[0].val[0]);
+			std::string value = std::string(p->elements[0].val, KV_LEN);
 			printf("==== invokeCommandSynch ===\n");
 			client->release(reply);
 
