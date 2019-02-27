@@ -58,20 +58,23 @@ using msgs::Concord;
 class ConcordServiceImpl final : public Concord::Service {
 private: 
 	IClient* c;
-	
+	BasicRandomTests::IStub* stub;
+
 public: 
 
-	ConcordServiceImpl(IClient* rc) 
+	ConcordServiceImpl(IClient* rc, BasicRandomTests::IStub* istub) 
 	{ 
 		c = rc;
+		stub = istub;
 	} 
+
 	grpc::Status Get(ServerContext* context, const GetRequest* request,
 		GetReply* reply) override {
+		printf("==== received Get request [%s:]====\n", request->key());
 
-    // const char *k = request->key().c_str();
+		std::string value = stub->read(c, request->key());
 
-    // redisReply *pRedisReply = (redisReply*)redisCommand(c, "GET %s", k);
-
+    reply->set_value(value);
     // if(pRedisReply->len > 0){
     //   std::cout << "received Get request [" << request->key() << ":" << pRedisReply->str << "]" << std::endl;
     //   reply->set_value(std::string(pRedisReply->str, pRedisReply->len));
@@ -84,12 +87,14 @@ public:
 
 	grpc::Status Set(ServerContext* context, const SetRequest* request,
 		SetReply* reply) override {
-		std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
+		printf("==== received Set request [%s:%s]====\n", request->key(), request->value());
+
+		stub->write(c, request->key(), request->value());
 
     // const char *k = request->key().c_str();
     // const char *v = request->value().c_str();
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "SET %s %b", k, v, request->value().length());
-		
+
     // freeReplyObject(pRedisReply); 
 
 		return grpc::Status::OK;
@@ -97,12 +102,11 @@ public:
 
 	grpc::Status Delete(ServerContext* context, const DeleteRequest* request,
 		DeleteReply* reply) override {
-
-		std::cout << "received Delete request [" << request->key() << "]" << std::endl;
+		printf("==== received Delete request [%s:]====\n", request->key());
 
     // const char *k = request->key().c_str();
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "DEL %s", k);
-		
+
     // freeReplyObject(pRedisReply); 
 
 		return grpc::Status::OK;
@@ -110,11 +114,11 @@ public:
 
 	grpc::Status Init(ServerContext* context, const InitRequest* request,
 		InitReply* reply) override {
-
+		printf("==== received Init request ====\n");
     // std::cout << "received Init request " << std::endl;
-		
+
     // redisReply *pRedisReply = (redisReply*)redisCommand(c, "flushall");
-		
+
     // freeReplyObject(pRedisReply); 
 
 		return grpc::Status::OK;
@@ -122,6 +126,8 @@ public:
 };
 
 void RunServer(IClient* c) {
+	BasicRandomTests::IStub* stub = BasicRandomTests::newStub();
+
 	std::string server_address("0.0.0.0:50051");
 
 	ConcordServiceImpl service(c);
@@ -139,7 +145,6 @@ void RunServer(IClient* c) {
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
 	server->Wait();
-	BasicRandomTests::IStub* stub = BasicRandomTests::newStub();
 }
 
 

@@ -405,8 +405,11 @@ namespace BasicRandomTests
 			printf("--- invokeCommandSynch ===\n");
 			client->invokeCommandSynch(command, true, reply);
 			print((SimpleReplyHeader*)reply.data);
+			std::string value = std::string(reply.data->elements[0].val[0], KV_LEN)
 			printf("==== invokeCommandSynch ===\n");
 			client->release(reply);
+
+			return value;
 		}
 
 		virtual void write(IClient* client, std::string k, std::string v)
