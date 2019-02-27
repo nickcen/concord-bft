@@ -65,7 +65,7 @@ public:
   { 
     c = rc;
   } 
-  Status Get(ServerContext* context, const GetRequest* request,
+  grpc::Status Get(ServerContext* context, const GetRequest* request,
     GetReply* reply) override {
 
     // const char *k = request->key().c_str();
@@ -79,10 +79,10 @@ public:
 
     // freeReplyObject(pRedisReply); 
 
-    return Status::OK;
+    return grpc::Status::OK;
   }
 
-  Status Set(ServerContext* context, const SetRequest* request,
+  grpc::Status Set(ServerContext* context, const SetRequest* request,
     SetReply* reply) override {
     std::cout << "received Set request [" << request->key() << ":" << request->value() << "]" << std::endl;
 
@@ -92,10 +92,10 @@ public:
     
     // freeReplyObject(pRedisReply); 
 
-    return Status::OK;
+    return grpc::Status::OK;
   }
 
-  Status Delete(ServerContext* context, const DeleteRequest* request,
+  grpc::Status Delete(ServerContext* context, const DeleteRequest* request,
     DeleteReply* reply) override {
 
     std::cout << "received Delete request [" << request->key() << "]" << std::endl;
@@ -105,10 +105,10 @@ public:
     
     // freeReplyObject(pRedisReply); 
 
-    return Status::OK;
+    return grpc::Status::OK;
   }
 
-  Status Init(ServerContext* context, const InitRequest* request,
+  grpc::Status Init(ServerContext* context, const InitRequest* request,
     InitReply* reply) override {
 
     // std::cout << "received Init request " << std::endl;
@@ -117,7 +117,7 @@ public:
     
     // freeReplyObject(pRedisReply); 
 
-    return Status::OK;
+    return grpc::Status::OK;
   }
 };
 
