@@ -381,7 +381,7 @@ namespace BasicRandomTests
 		printf("\n");
 	}
 
-	class Stub
+	class Stub : public IStub
 	{
 	public:
 		virtual std::string read(IClient* client, std::string k)

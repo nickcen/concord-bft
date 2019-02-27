@@ -21,9 +21,9 @@ using std::string;
 
 namespace BasicRandomTests
 {
-  class Stub;
+  class IStub;
 
-  class Stub
+  class IStub
   {
   public:
     virtual std::string read(IClient* client, std::string k) = 0;
