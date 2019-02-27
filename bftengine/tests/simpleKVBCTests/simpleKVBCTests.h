@@ -19,7 +19,7 @@ using namespace SimpleKVBC;
 
 namespace BasicRandomTests
 {
-	void run(IClient* client);
+	Internal::InternalTestsBuilder run(IClient* client);
 
 	ICommandsHandler* commandsHandler();
 }
