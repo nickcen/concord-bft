@@ -461,11 +461,6 @@ namespace BasicRandomTests
 
 		}
 
-		void read(IClient* client, std::string k)
-		{
-			
-		}
-
 		size_t sizeOfReq(SimpleRequestHeader* req)
 		{
 			if (req->type == 1)
