@@ -133,7 +133,7 @@ void RunServer(IClient* c) {
 
 	std::string server_address("0.0.0.0:50051");
 
-	ConcordServiceImpl service(c);
+	ConcordServiceImpl service(c, stub);
 
 	ServerBuilder builder;
   // Listen on the given address without any authentication mechanism.
@@ -147,6 +147,8 @@ void RunServer(IClient* c) {
 
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
+  c->start();
+  
 	server->Wait();
 }
 
