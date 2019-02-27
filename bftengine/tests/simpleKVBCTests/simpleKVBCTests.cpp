@@ -432,7 +432,7 @@ namespace BasicRandomTests
 		{
 			friend void BasicRandomTests::run(IClient* client);
 
-			static void createRandomTest(IClient* client)
+			static InternalTestsBuilder createRandomTest(IClient* client)
 			{
 				InternalTestsBuilder t(1);
 				t.write(client, "k1", "v1");
@@ -443,6 +443,8 @@ namespace BasicRandomTests
 
 				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
 					SimpleBlock::free(it->second);
+
+				return t;
 			}
 
 			static void free(std::list<SimpleRequestHeader*>& outRequests, std::list<SimpleReplyHeader*>& outReplies)
@@ -839,17 +841,18 @@ namespace BasicRandomTests
 		}
 	}
 
-	void run(IClient* client)
+	InternalTestsBuilder run(IClient* client)
 	{
 		assert(!client->isRunning());
 
 		client->start();
 
-		// Internal::InternalTestsBuilder::createRandomTest(client);
+		InternalTestsBuilder t = Internal::InternalTestsBuilder::createRandomTest(client);
 
 		// client->stop();
 
-		getchar();
+		// getchar();
+		return t;
 	}
 
 
