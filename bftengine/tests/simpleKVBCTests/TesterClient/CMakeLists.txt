@@ -40,7 +40,9 @@ target_link_libraries(skvbc_client PUBLIC threshsign)
 
 target_link_libraries(skvbc_client PUBLIC corebft)
 
-target_link_libraries(skvbc_client gRPC::grpc++_reflection protobuf::libprotobuf)
+target_link_libraries(skvbc_client PUBLIC gRPC::grpc++_reflection)
+
+target_link_libraries(skvbc_client PUBLIC protobuf::libprotobuf)
 
 target_include_directories(skvbc_client PUBLIC ../../SimpleKVBC/include)
 target_include_directories(skvbc_client PUBLIC ..)
