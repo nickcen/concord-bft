@@ -14,12 +14,21 @@
 #pragma once 
 
 #include "KVBCInterfaces.h"
+#include <string>
 
 using namespace SimpleKVBC;
+using std::string;
 
 namespace BasicRandomTests
 {
-	void run(IClient* client);
+  class Stub;
 
-	ICommandsHandler* commandsHandler();
+  class Stub
+  {
+  public:
+    virtual std::string read(IClient* client, std::string k) = 0;
+    virtual void write(IClient* client, std::string k, std::string v) = 0;
+  };
+
+  ICommandsHandler* commandsHandler();
 }
