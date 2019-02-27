@@ -26,7 +26,6 @@ using std::list;
 using std::map;
 using std::set;
 
-
 #define KV_LEN (21)
 #define NUMBER_OF_KEYS (200) 
 #define CONFLICT_DISTANCE (49)
@@ -83,19 +82,6 @@ namespace BasicRandomTests
 				char* p1 = (char*)p;
 				delete[] p1;
 			}
-
-			//static void print(SimpleBlock* block)
-			//{
-			//	printf("\nBlockId=%" PRId64 " Items=%zu", block->id, block->numberOfItems);
-			//	for (size_t i = 0; i < block->numberOfItems; i++)
-			//	{
-			//		printf("\n");
-			//		printf("Block id %" PRId64 " item %3zu key=", block->id, i);
-			//		for (int k = 0; k < KV_LEN; k++) printf("%02X", block->items[i].key[k]);
-			//		printf("   val=");
-			//		for (int k = 0; k < KV_LEN; k++) printf("%02X", block->items[i].val[k]);
-			//	}
-			//}
 		};
 
 		struct SimpleRequestHeader
@@ -188,8 +174,6 @@ namespace BasicRandomTests
 			{
 				return ((SimpleKey*)((char*)keys));
 			}
-
-
 		};
 
 
@@ -217,9 +201,6 @@ namespace BasicRandomTests
 			SimpleRequestHeader h;
 		};
 
-
-
-
 		struct SimpleReplyHeader
 		{
 			char type; // 1 == conditional write , 2 == read, 3 == get last block
@@ -231,8 +212,6 @@ namespace BasicRandomTests
 			}
 
 		};
-
-
 
 		struct SimpleReplyHeader_ConditionalWrite
 		{
@@ -430,7 +409,7 @@ namespace BasicRandomTests
 
 		class InternalTestsBuilder
 		{
-			friend Internal::InternalTestsBuilder BasicRandomTests::run(IClient* client);
+			friend void BasicRandomTests::run(IClient* client);
 
 			static Internal::InternalTestsBuilder createRandomTest(IClient* client)
 			{
@@ -440,9 +419,6 @@ namespace BasicRandomTests
 				t.read(client, "k1");
 				t.read(client, "k2");
 				t.create(client);
-
-				for (map<BlockId, SimpleBlock*>::iterator it = t.m_internalBlockchain.begin(); it != t.m_internalBlockchain.end(); it++)
-					SimpleBlock::free(it->second);
 
 				return t;
 			}
@@ -456,12 +432,6 @@ namespace BasicRandomTests
 					SimpleReplyHeader::free(*it);
 			}
 
-			std::list<SimpleRequestHeader*> m_requests;
-			std::list<SimpleReplyHeader*> m_replies;
-
-			std::map<BlockId, SimpleBlock*> m_internalBlockchain;
-			std::map<SimpleKIDPair, SimpleVal> m_map;
-
 			BlockId m_lastBlockId;
 
 			InternalTestsBuilder(int64_t testPrefix) //: m_testPrefix(testPrefix)
@@ -471,16 +441,7 @@ namespace BasicRandomTests
 
 			void create(IClient* client)
 			{
-				for (std::map<BlockId, SimpleBlock*>::iterator it = m_internalBlockchain.begin();
-					it != m_internalBlockchain.end(); it++)
-				{
-					BlockId bId = it->first;
-					SimpleBlock* block = it->second;
-					(void)bId;
-					(void)block;
-
-					assert(bId == block->id);
-				}
+				
 			}
 
 			void write(IClient* client, std::string k, std::string v)
@@ -518,51 +479,6 @@ namespace BasicRandomTests
 				print((SimpleReplyHeader*)reply.data);
 				printf("==== invokeCommandSynch ===\n");
 				client->release(reply);
-
-				// // look for conflicts
-				// bool foundConflict = false;
-				// for (BlockId i = readVer + 1; (i <= m_lastBlockId) && !foundConflict; i++)
-				// {
-				// 	SimpleBlock* currBlock = m_internalBlockchain[i];
-
-				// 	for (size_t a = 0; (a < numberOfKeysInReadSet) && !foundConflict; a++)
-				// 		for (size_t b = 0; (b < currBlock->numberOfItems) && !foundConflict; b++)
-				// 		{
-				// 			if (memcmp(pReadKeysArray[a].key, currBlock->items[b].key, KV_LEN) == 0)
-				// 				foundConflict = true;
-				// 		}
-				// 	}
-
-				// // if needed, add new block into the blockchain
-				// 	if (!foundConflict)
-				// 	{
-				// 		m_lastBlockId++;
-
-				// 		const size_t N = pHeader->numberOfWrites;
-
-				// 		SimpleBlock* pNewBlock = SimpleBlock::alloc(N);
-
-				// 		pNewBlock->id = m_lastBlockId;
-				// 		pNewBlock->numberOfItems = N;
-
-				// 		for (size_t i = 0; i < N; i++)
-				// 		{
-				// 			pNewBlock->items[i] = pWritesKVArray[i];
-
-				// 			SimpleKey sk;
-				// 			memcpy(sk.key, pWritesKVArray[i].key, KV_LEN);
-
-				// 			SimpleVal sv;
-				// 			memcpy(sv.v, pWritesKVArray[i].val, KV_LEN);
-
-				// 			SimpleKIDPair kiPair(sk, m_lastBlockId);
-				// 			m_map[kiPair] = sv;
-				// 		}
-
-				// 		m_internalBlockchain[m_lastBlockId] = pNewBlock;
-				// 	}
-
-				// 	return pHeader;
 			}
 
 			void read(IClient* client, std::string k)
@@ -579,8 +495,6 @@ namespace BasicRandomTests
 
 				strcpy(pHeader->keys[0].key, k.c_str());
 
-				// add request to m_requests
-					// m_requests.push_back((SimpleRequestHeader*)pHeader);
 				print((SimpleRequestHeader*)pHeader);
 				Slice command((const char*)pHeader, sizeOfReq((SimpleRequestHeader*)pHeader));
 				Slice reply;
@@ -670,21 +584,12 @@ namespace BasicRandomTests
 					SimpleKV* keyValArray = pCondWrite->keyValArray();
 					SetOfKeyValuePairs updates;
 
-					//printf("\nAdding BlockId=%" PRId64 " ", currBlock + 1);
-
 					for (size_t i = 0; i < pCondWrite->numberOfWrites; i++)
 					{
 						Slice key(keyValArray[i].key, KV_LEN);
 						Slice val(keyValArray[i].val, KV_LEN);
 						KeyValuePair kv(key, val);
 						updates.insert(kv);
-						//printf("\n");
-						//for (int k = 0; k < sizeof(size_t); k++)
-						//	printf("%02X", key.data()[k]);
-						//printf("%04s", " ");
-						//for (int k = 0; k < sizeof(size_t); k++)
-						//	printf("%02X", val.data()[k]);
-
 					}
 					//printf("\n\n");
 					BlockId newBlockId = 0;
@@ -841,7 +746,7 @@ namespace BasicRandomTests
 		}
 	}
 
-	Internal::InternalTestsBuilder run(IClient* client)
+	void run(IClient* client)
 	{
 		assert(!client->isRunning());
 
@@ -852,7 +757,6 @@ namespace BasicRandomTests
 		// client->stop();
 
 		// getchar();
-		return t;
 	}
 
 
